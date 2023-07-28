@@ -7,6 +7,8 @@ def format_time_ago(date: datetime):
     difference = now - date
 
     if difference >= timedelta(days=1):
-        return f"{difference.days}d"
+        return f"{difference.days}d ago"
+    elif difference >= timedelta(weeks=1):
+        return f"{difference.days}d ago"
     else:
         return date.strftime("%I:%M %p")

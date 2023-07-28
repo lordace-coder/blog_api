@@ -8,11 +8,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comments
-        fields = [
-            "author",
-            "comment",
-            "date"
-        ]
+        fields = "__all__"
 
     def get_date(self, obj):
         return obj.get_formated_date
@@ -30,7 +26,8 @@ class PostListSerializers(serializers.ModelSerializer):
 
 
 class PostDetailSerializer(serializers.ModelSerializer):
-    comments = CommentSerializer(many=True)
+    # comment =  serializers.SerializerMethodField()
+    coms = serializers.CharField(source="comment.all")
     date = serializers.SerializerMethodField()
 
     class Meta:
@@ -42,8 +39,26 @@ class PostDetailSerializer(serializers.ModelSerializer):
             "image",
             "post",
             "date",
-            "comments",
+            # 'comment',
+            'coms'
         ]
 
     def get_date(self, obj):
         return obj.get_formated_date
+
+    # def get_comment(self,obj):
+    #     query = obj.comment.all()
+    #     for i in query:
+    #         print(i.author)
+    #     print(dir(query))
+        
+    #     data =  CommentSerializer(instance=query.iterator).data
+    #     print(data)
+    #     return data
+
+class CarouselSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Carousel
+        fields = "__all__"
+
+

@@ -1,8 +1,8 @@
 from rest_framework import generics
 from rest_framework.decorators import api_view
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
+from .mixins import StaffEditOnly
 from .models import Post
 from .serializers import PostDetailSerializer, PostListSerializers
 
@@ -12,10 +12,14 @@ def index(request):
     return Response('hello')
 
 
-class PostsApiView(generics.ListCreateAPIView):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+class PostsApiView(generics.ListAPIView):
     serializer_class = PostListSerializers
     queryset = Post.objects.all()
+
+class CreatePostView(generics.CreateAPIView,StaffEditOnly):
+    serializer_class = PostListSerializers
+    queryset = Post.objects.all()
+
 
 
 class PostDetailApiView(generics.RetrieveAPIView):
@@ -37,3 +41,15 @@ class PostDetailApiView(generics.RetrieveAPIView):
             obj.view_post()
             session.modified = True
         return obj
+
+
+    
+    
+    
+class EditDeletePostView(generics.RetrieveUpdateDestroyAPIView,StaffEditOnly):
+    queryset = Post.objects.all()
+    serializer_class = PostDetailSerializer
+
+
+class CreateComment(generics.CreateAPIView):
+    ...

@@ -1,4 +1,6 @@
+import os
 from datetime import timezone
+from typing import Any, Dict, Tuple
 
 from django.contrib.auth import get_user_model
 from django.db import models
@@ -24,20 +26,6 @@ class Categories(models.Model):
         return self.category
 
 
-class Comments(models.Model):
-    date_created = models.DateTimeField(auto_now_add=True)
-    author = models.ForeignKey(user, on_delete=models.CASCADE)
-    comment = models.CharField(max_length=200)
-
-    @property
-    def get_formated_date(self):
-        return format_time_ago(self.date_created)
-
-    def __str__(self):
-        return f"{self.author.username[0:10]} -{self.comment[0:20]}"
-
-    class Meta:
-        verbose_name = 'Comments'
 
 
 class Post(models.Model):
@@ -47,8 +35,7 @@ class Post(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     category = models.ManyToManyField(
         Categories, related_name='categories', blank=True, )
-    comments = models.ManyToManyField(
-        Comments, blank=True)
+
     views = models.IntegerField(default=0)
 
     def view_post(self):
@@ -61,3 +48,25 @@ class Post(models.Model):
     @property
     def get_formated_date(self):
         return format_time_ago(self.date_created)
+    
+    def delete(self,*args, **kwargs) :
+        os.remove(self.image)
+        return super().delete(*args, **kwargs)
+
+
+class Comments(models.Model):
+    date_created = models.DateTimeField(auto_now_add=True)
+    author = models.ForeignKey(user, on_delete=models.CASCADE)
+    comment = models.CharField(max_length=200)
+    post = models.ManyToManyField(
+        Post, blank=True,related_name='comment')
+    @property
+    def get_formated_date(self):
+        return format_time_ago(self.date_created)
+
+    def __str__(self):
+        return f"{self.author.username[0:10]} -{self.comment[0:20]}"
+
+    class Meta:
+        verbose_name = 'Comments'
+# Comments.d
