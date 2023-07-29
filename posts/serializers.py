@@ -5,31 +5,47 @@ from .models import Carousel, Categories, Comments, Post
 
 class CommentSerializer(serializers.ModelSerializer):
     date = serializers.SerializerMethodField()
-
+    author = serializers.CharField(source='author.username')
     class Meta:
         model = Comments
-        fields = "__all__"
+        exclude = ('date_created','id')
 
     def get_date(self, obj):
         return obj.get_formated_date
 
 
+
+
 class PostListSerializers(serializers.ModelSerializer):
+    intro = serializers.SerializerMethodField()
+    author = serializers.SerializerMethodField()
+    post_detail_url = serializers.HyperlinkedIdentityField(view_name='post_detail',lookup_field='pk')
     class Meta:
         model = Post
         fields = [
+            "id",
             "title",
             "views",
             "category",
-            "image"
+            "image",
+            "intro",
+            "author",
+            "post_detail_url"
         ]
+
+    def get_intro(self,obj):
+        return obj.post[0:300]
+    
+    def get_author(self,obj):
+        return "ZenBlog"
 
 
 class PostDetailSerializer(serializers.ModelSerializer):
-    # comment =  serializers.SerializerMethodField()
-    coms = serializers.CharField(source="comment.all")
+    comment = CommentSerializer(read_only = True,many=True)
+    author = serializers.SerializerMethodField()
     date = serializers.SerializerMethodField()
-
+    comment_count = serializers.SerializerMethodField(read_only = True)
+    
     class Meta:
         model = Post
         fields = [
@@ -39,23 +55,19 @@ class PostDetailSerializer(serializers.ModelSerializer):
             "image",
             "post",
             "date",
-            # 'comment',
-            'coms'
+            'comment_count',
+            'comment',
+            'author'
         ]
 
     def get_date(self, obj):
         return obj.get_formated_date
 
-    # def get_comment(self,obj):
-    #     query = obj.comment.all()
-    #     for i in query:
-    #         print(i.author)
-    #     print(dir(query))
-        
-    #     data =  CommentSerializer(instance=query.iterator).data
-    #     print(data)
-    #     return data
-
+    def get_author(self,obj):
+        return "ZenBlog"
+    
+    def get_comment_count(self,obj):
+        return obj.comment.count()
 class CarouselSerializer(serializers.ModelSerializer):
     class Meta:
         model = Carousel

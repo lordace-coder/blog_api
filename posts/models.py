@@ -27,6 +27,21 @@ class Categories(models.Model):
 
 
 
+class Comments(models.Model):
+    date_created = models.DateTimeField(auto_now_add=True)
+    author = models.ForeignKey(user, on_delete=models.CASCADE)
+    comment = models.CharField(max_length=200)
+
+    @property
+    def get_formated_date(self):
+        return format_time_ago(self.date_created)
+
+    def __str__(self):
+        return f"{self.author.username[0:10]} -{self.comment[0:20]}"
+
+
+
+
 
 class Post(models.Model):
     title = models.TextField(max_length=100)
@@ -37,7 +52,7 @@ class Post(models.Model):
         Categories, related_name='categories', blank=True, )
 
     views = models.IntegerField(default=0)
-
+    comment = models.ManyToManyField(Comments,related_name='user_comments')
     def view_post(self):
         self.views += 1
         self.save()
@@ -53,20 +68,3 @@ class Post(models.Model):
         os.remove(self.image)
         return super().delete(*args, **kwargs)
 
-
-class Comments(models.Model):
-    date_created = models.DateTimeField(auto_now_add=True)
-    author = models.ForeignKey(user, on_delete=models.CASCADE)
-    comment = models.CharField(max_length=200)
-    post = models.ManyToManyField(
-        Post, blank=True,related_name='comment')
-    @property
-    def get_formated_date(self):
-        return format_time_ago(self.date_created)
-
-    def __str__(self):
-        return f"{self.author.username[0:10]} -{self.comment[0:20]}"
-
-    class Meta:
-        verbose_name = 'Comments'
-# Comments.d
