@@ -5,14 +5,14 @@ from .models import Carousel, Categories, Comments, Post
 
 class CommentSerializer(serializers.ModelSerializer):
     date = serializers.SerializerMethodField()
-    author = serializers.CharField(source='author.username')
+    author = serializers.CharField(source='author.username',read_only = True)
     class Meta:
         model = Comments
         exclude = ('date_created','id')
 
     def get_date(self, obj):
+       
         return obj.get_formated_date
-
 
 
 
@@ -74,3 +74,26 @@ class CarouselSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Categories
+        fields = [
+            'id',
+            'category'
+        ]
+
+
+class PostCreateSerializer(serializers.ModelSerializer):
+    comment = CommentSerializer(read_only = True,many=True)
+    
+    class Meta:
+        model = Post
+        fields = [
+            "title",
+            "category",
+            "image",
+            "post",
+            "comment"
+      
+        ]

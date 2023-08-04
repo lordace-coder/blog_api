@@ -1,16 +1,23 @@
-from rest_framework import generics
+from django.http import Http404
+from rest_framework import generics, status
+from rest_framework.authentication import (SessionAuthentication,
+                                           TokenAuthentication)
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from .mixins import StaffEditOnly
-from .models import Comments, Post
-from .serializers import (CommentSerializer, PostDetailSerializer,
+from .mixins import StaffEditOnly, UserEditOnly
+from .models import Categories, Comments, Post
+from .serializers import (CategorySerializer, CommentSerializer,
+                          PostCreateSerializer, PostDetailSerializer,
                           PostListSerializers)
 
 
 @api_view(['GET'])
 def index(request):
-    return Response('hello')
+    categories = Categories.objects.all()
+    data = CategorySerializer(categories,many = True)
+    
+    return Response(data.data)
 
 
 class PostsApiView(generics.ListAPIView):
@@ -18,8 +25,8 @@ class PostsApiView(generics.ListAPIView):
     queryset = Post.objects.all()
 
 class CreatePostView(generics.CreateAPIView,StaffEditOnly):
-    serializer_class = PostListSerializers
-    queryset = Post.objects.all()
+    serializer_class = PostCreateSerializer
+    # queryset = Post.objects.all()
 
 
 
@@ -54,8 +61,30 @@ class EditDeletePostView(generics.RetrieveUpdateDestroyAPIView,StaffEditOnly):
     serializer_class = PostDetailSerializer
 
 
-class CreateComment(generics.ListCreateAPIView):
+class CreateComment(generics.ListCreateAPIView,UserEditOnly):
     serializer_class = CommentSerializer
     queryset = Comments.objects.all()
+    authentication_classes = [TokenAuthentication]
+    
 
     
+    def post(self, request, *args, **kwargs):
+        print(request.data,request.user)
+        post_id = kwargs.get('post_id')
+        data = dict()
+        comment = request.POST.get('comment') 
+        data['comment'] = comment if comment else request.data.get('comment')
+        data['author'] = request.user.username
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return Response({'error': 'Post not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+        serializer = self.get_serializer(data=data)
+       
+        serializer.is_valid(raise_exception=True)
+        comment = serializer.save(author=request.user)
+        post.comment.add(comment)
+        post.save()
+    
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

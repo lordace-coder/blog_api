@@ -52,7 +52,7 @@ class Post(models.Model):
         Categories, related_name='categories', blank=True, )
 
     views = models.IntegerField(default=0)
-    comment = models.ManyToManyField(Comments,related_name='user_comments')
+    comment = models.ManyToManyField(Comments,related_name='user_comments',blank=True,null=True)
     def view_post(self):
         self.views += 1
         self.save()
