@@ -26,7 +26,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
-    'users'
+    'users',
+    'blog_admin'
 ]
 
 MIDDLEWARE = [

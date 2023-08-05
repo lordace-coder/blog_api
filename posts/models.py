@@ -4,6 +4,7 @@ from typing import Any, Dict, Tuple
 
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.urls import reverse
 
 from helpers.format_date import format_time_ago
 
@@ -60,6 +61,10 @@ class Post(models.Model):
     def __str__(self):
         return self.title
 
+    @property
+    def get_absolute_url(self):
+        return reverse("post_detail", kwargs={"pk": self.pk})
+    
     @property
     def get_formated_date(self):
         return format_time_ago(self.date_created)

@@ -26,7 +26,14 @@ class PostsApiView(generics.ListAPIView):
 
 class CreatePostView(generics.CreateAPIView,StaffEditOnly):
     serializer_class = PostCreateSerializer
-    # queryset = Post.objects.all()
+    queryset = Post.objects.all()
+    
+    def post(self, request, *args, **kwargs):
+        # if request.POST['image']:
+        #     p = request.POST['image']
+        #     with open('uploaded_file.jpg','wb') as img:
+        #         img.write(p)
+        return super().post(request, *args, **kwargs)
 
 
 
@@ -69,7 +76,6 @@ class CreateComment(generics.ListCreateAPIView,UserEditOnly):
 
     
     def post(self, request, *args, **kwargs):
-        print(request.data,request.user)
         post_id = kwargs.get('post_id')
         data = dict()
         comment = request.POST.get('comment') 

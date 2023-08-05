@@ -1,7 +1,7 @@
 import requests
 from get_auth_token import get_token
 
-URL = "http://localhost:8000/comment/1"
+URL = "http://localhost:8000/create_post/"
 
 
 headers = {
@@ -16,11 +16,11 @@ Remember to adjust the API endpoint URL ('/api/auth/login/') and the error handl
 Using fetch, you can handle HTTP requests in your React project without adding an additional library like axios.
 I hope this helps! Let me know if you have any further questions.""",
     "title":"Using Fetch API",
-    "image":'',
-    'category':''
-}
 
-response = requests.post(URL, data=data, headers=headers)
+}
+with open("images/slide-1.jpg","rb") as img:
+    data['image'] = img
+    response = requests.post(URL, data=data, headers=headers)
 
 if response.status_code == requests.codes.created:
     print("status code", response.status_code)
