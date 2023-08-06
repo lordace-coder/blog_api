@@ -70,6 +70,7 @@ class Post(models.Model):
         return format_time_ago(self.date_created)
     
     def delete(self,*args, **kwargs) :
-        os.remove(self.image)
+        if self.image:
+            os.remove(self.image)
         return super().delete(*args, **kwargs)
 

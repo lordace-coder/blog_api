@@ -86,7 +86,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class PostCreateSerializer(serializers.ModelSerializer):
     comment = CommentSerializer(read_only = True,many=True)
-    
+    category = CategorySerializer(required=False,many=False)
     class Meta:
         model = Post
         fields = [
@@ -97,3 +97,14 @@ class PostCreateSerializer(serializers.ModelSerializer):
             "comment"
       
         ]
+    
+    def create(self, validated_data):
+        category = validated_data.pop('category')
+        new_category = Categories.objects.filter(**category)
+        new_post = Post.objects.create(**validated_data)
+        x= new_post
+        new_post.category.set(new_category)
+
+        new_post.save()
+        return new_post
+        

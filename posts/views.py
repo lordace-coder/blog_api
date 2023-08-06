@@ -24,16 +24,34 @@ class PostsApiView(generics.ListAPIView):
     serializer_class = PostListSerializers
     queryset = Post.objects.all()
 
-class CreatePostView(generics.CreateAPIView,StaffEditOnly):
+class CreatePostView(generics.CreateAPIView, StaffEditOnly):
     serializer_class = PostCreateSerializer
     queryset = Post.objects.all()
     
     def post(self, request, *args, **kwargs):
-        # if request.POST['image']:
-        #     p = request.POST['image']
-        #     with open('uploaded_file.jpg','wb') as img:
-        #         img.write(p)
-        return super().post(request, *args, **kwargs)
+        category = request.data.get('category')
+        # for rest framework view
+        if not category:
+            category = request.data.get('category.category')
+        image = request.data.get('image')
+        if not category:
+            qs = Categories.objects.get(category="Business")
+        else:
+            qs = Categories.objects.get(category=category)
+        category_data = CategorySerializer(qs,many=False)
+        new_dict ={
+            'title':request.data.get('title'),
+            'post':request.data.get('post'),
+            'image':image if image else None,
+            'category':category_data.data
+        }
+        serializer = self.get_serializer(data=new_dict)
+        serializer.is_valid(raise_exception=True)
+        
+        serializer.save()
+        
+        return Response({'success':"post uploadedsuccesfully"})
+
 
 
 
