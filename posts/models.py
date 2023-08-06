@@ -71,6 +71,7 @@ class Post(models.Model):
     
     def delete(self,*args, **kwargs) :
         if self.image:
-            os.remove(self.image)
+            # print(dir(self.image.))
+            os.remove(self.image.path)
         return super().delete(*args, **kwargs)
 
