@@ -27,7 +27,6 @@ class Categories(models.Model):
         return self.category
 
 
-
 class Comments(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(user, on_delete=models.CASCADE)
@@ -41,9 +40,6 @@ class Comments(models.Model):
         return f"{self.author.username[0:10]} -{self.comment[0:20]}"
 
 
-
-
-
 class Post(models.Model):
     title = models.TextField(max_length=100)
     post = models.TextField()
@@ -53,25 +49,42 @@ class Post(models.Model):
         Categories, related_name='categories', blank=True, )
 
     views = models.IntegerField(default=0)
-    comment = models.ManyToManyField(Comments,related_name='user_comments',blank=True,null=True)
-    def view_post(self):
-        self.views += 1
-        self.save()
+    comment = models.ManyToManyField(
+        Comments, related_name='user_comments', blank=True)
+
+    def view_post(self, user: user):
+        qs = ViewPost.objects.filter(post=self, user=user)
+        if not qs.exists():
+            self.mark_seen()
+            new_view = ViewPost.objects.create(post=self, user=user)
+            new_view.save()
 
     def __str__(self):
         return self.title
-
+  
+    def mark_seen(self):
+        self.views +=1
+        return self.save()
     @property
     def get_absolute_url(self):
         return reverse("post_detail", kwargs={"pk": self.pk})
-    
+
     @property
     def get_formated_date(self):
         return format_time_ago(self.date_created)
-    
-    def delete(self,*args, **kwargs) :
+
+    def delete(self, *args, **kwargs):
         if self.image:
             # print(dir(self.image.))
             os.remove(self.image.path)
         return super().delete(*args, **kwargs)
 
+
+class ViewPost(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    user = models.ForeignKey(user, on_delete=models.CASCADE)
+
+    @staticmethod
+    def seen(post,user)->bool:
+        qs = ViewPost.objects.filter(post=post,user=user).exists()
+        return qs

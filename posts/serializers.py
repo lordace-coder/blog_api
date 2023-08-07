@@ -18,7 +18,9 @@ class CommentSerializer(serializers.ModelSerializer):
 
 class PostListSerializers(serializers.ModelSerializer):
     intro = serializers.SerializerMethodField()
+    date = serializers.SerializerMethodField()
     author = serializers.SerializerMethodField()
+    category = serializers.SerializerMethodField()
     post_detail_url = serializers.HyperlinkedIdentityField(view_name='post_detail',lookup_field='pk')
     class Meta:
         model = Post
@@ -30,12 +32,18 @@ class PostListSerializers(serializers.ModelSerializer):
             "image",
             "intro",
             "author",
-            "post_detail_url"
+            "post_detail_url",
+            'date'
         ]
+    def get_date(self, obj):
+        return obj.get_formated_date
 
     def get_intro(self,obj):
         return obj.post[0:300]
     
+    def get_category(self,obj:Post):
+        qs = obj.category.first()
+        return f"{qs}"
     def get_author(self,obj):
         return "ZenBlog"
 
@@ -43,6 +51,7 @@ class PostListSerializers(serializers.ModelSerializer):
 class PostDetailSerializer(serializers.ModelSerializer):
     comment = CommentSerializer(read_only = True,many=True)
     author = serializers.SerializerMethodField()
+    category = serializers.SerializerMethodField()
     date = serializers.SerializerMethodField()
     comment_count = serializers.SerializerMethodField(read_only = True)
     
@@ -68,6 +77,9 @@ class PostDetailSerializer(serializers.ModelSerializer):
     
     def get_comment_count(self,obj):
         return obj.comment.count()
+    def get_category(self,obj:Post):
+        qs = obj.category.first()
+        return f"{qs}"
 class CarouselSerializer(serializers.ModelSerializer):
     class Meta:
         model = Carousel

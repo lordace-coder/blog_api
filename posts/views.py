@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from .mixins import StaffEditOnly, UserEditOnly
-from .models import Categories, Comments, Post
+from .models import Categories, Comments, Post, ViewPost
 from .serializers import (CategorySerializer, CommentSerializer,
                           PostCreateSerializer, PostDetailSerializer,
                           PostListSerializers)
@@ -22,7 +22,7 @@ def index(request):
 
 class PostsApiView(generics.ListAPIView):
     serializer_class = PostListSerializers
-    queryset = Post.objects.all()
+    queryset = Post.objects.all().order_by('?')
 
 class CreatePostView(generics.CreateAPIView, StaffEditOnly):
     serializer_class = PostCreateSerializer
@@ -61,21 +61,12 @@ class PostDetailApiView(generics.RetrieveAPIView):
 
     
     #  todo: work on this
-    # def get_object(self):
-    #     session = self.request.session
-    #     obj = super().get_object()
-    #     if 'viewed' in session:
-    #         if not obj.id in session['viewed']:
-    #             session['viewed'].append(obj.id)
-    #             obj.view_post()
-    #             session.modified = True
-
-    #     else:
-    #         session['viewed'] = list()
-    #         session['viewed'].append(obj.id)
-    #         obj.view_post()
-    #         session.modified = True
-    #     return obj
+    def get_object(self):
+        obj:Post = super().get_object()
+        user =self.request.user
+        if user.is_authenticated and not ViewPost.seen(post = obj,user=user):
+            obj.view_post(user=user)           
+        return obj   
 
 
     
@@ -112,3 +103,24 @@ class CreateComment(generics.ListCreateAPIView,UserEditOnly):
         post.save()
     
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+class GetPostBycategory(generics.ListAPIView):
+    serializer_class = PostListSerializers
+    queryset = Post.objects.all()
+
+
+    def get_queryset(self):
+        category = self.kwargs.get('category')
+        qs = Categories.objects.filter(category__icontains=category).first()
+        new_queryset = self.queryset.filter(category=qs)
+        return new_queryset
+
+
+class TrendingPosts(generics.ListAPIView):
+    serializer_class = PostListSerializers
+    queryset = Post.objects.order_by('-views')[0:5]
+
+
+class LatestPosts(generics.ListAPIView):
+    serializer_class = PostListSerializers
+    queryset = Post.objects.order_by('-date_created','-views')[0:10]
