@@ -58,11 +58,15 @@ class CreatePostView(generics.CreateAPIView, StaffEditOnly):
 class PostDetailApiView(generics.RetrieveAPIView):
     queryset = Post.objects.all()
     serializer_class = PostDetailSerializer
+    lookup_field = 'slug'
+
+
 
     
     #  todo: work on this
     def get_object(self):
-        obj:Post = super().get_object()
+        queryset = self.get_queryset()
+        obj = queryset.get(slug=self.kwargs['slug'])
         user =self.request.user
         if user.is_authenticated and not ViewPost.seen(post = obj,user=user):
             obj.view_post(user=user)           
@@ -75,6 +79,13 @@ class PostDetailApiView(generics.RetrieveAPIView):
 class EditDeletePostView(generics.RetrieveUpdateDestroyAPIView,StaffEditOnly):
     queryset = Post.objects.all()
     serializer_class = PostDetailSerializer
+    lookup_field = 'slug'
+    
+    def get_object(self):
+        queryset = self.get_queryset()
+        obj = queryset.get(slug=self.kwargs['slug'])
+        return obj
+
 
 
 class CreateComment(generics.ListCreateAPIView,UserEditOnly):
@@ -85,13 +96,13 @@ class CreateComment(generics.ListCreateAPIView,UserEditOnly):
 
     
     def post(self, request, *args, **kwargs):
-        post_id = kwargs.get('post_id')
+        post_slug = kwargs.get('slug')
         data = dict()
         comment = request.POST.get('comment') 
         data['comment'] = comment if comment else request.data.get('comment')
         data['author'] = request.user.username
         try:
-            post = Post.objects.get(id=post_id)
+            post = Post.objects.get(slug=post_slug)
         except Post.DoesNotExist:
             return Response({'error': 'Post not found'}, status=status.HTTP_404_NOT_FOUND)
     

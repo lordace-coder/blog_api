@@ -21,11 +21,10 @@ class PostListSerializers(serializers.ModelSerializer):
     date = serializers.SerializerMethodField()
     author = serializers.SerializerMethodField()
     category = serializers.SerializerMethodField()
-    post_detail_url = serializers.HyperlinkedIdentityField(view_name='post_detail',lookup_field='pk')
+    post_detail_url = serializers.HyperlinkedIdentityField(view_name='post_detail',lookup_field='slug')
     class Meta:
         model = Post
         fields = [
-            "id",
             "title",
             "views",
             "category",
@@ -33,7 +32,8 @@ class PostListSerializers(serializers.ModelSerializer):
             "intro",
             "author",
             "post_detail_url",
-            'date'
+            'date',
+            'slug'
         ]
     def get_date(self, obj):
         return obj.get_formated_date
@@ -54,7 +54,7 @@ class PostDetailSerializer(serializers.ModelSerializer):
     category = serializers.SerializerMethodField()
     date = serializers.SerializerMethodField()
     comment_count = serializers.SerializerMethodField(read_only = True)
-    
+    post_detail_url = serializers.HyperlinkedIdentityField(view_name='post_detail',lookup_field='slug')
     class Meta:
         model = Post
         fields = [
@@ -66,7 +66,9 @@ class PostDetailSerializer(serializers.ModelSerializer):
             "date",
             'comment_count',
             'comment',
-            'author'
+            'author',
+            'post_detail_url',
+            'slug'
         ]
 
     def get_date(self, obj):

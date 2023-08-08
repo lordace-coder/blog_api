@@ -1,10 +1,11 @@
 import os
 from datetime import timezone
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Iterable, Optional, Tuple
 
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.urls import reverse
+from django.utils.text import slugify
 
 from helpers.format_date import format_time_ago
 
@@ -43,6 +44,7 @@ class Comments(models.Model):
 class Post(models.Model):
     title = models.TextField(max_length=100)
     post = models.TextField()
+    slug = models.SlugField(max_length=100,null=True,blank=True)
     image = models.ImageField(blank=True, null=True, upload_to="images/posts")
     date_created = models.DateTimeField(auto_now_add=True)
     category = models.ManyToManyField(
@@ -73,9 +75,12 @@ class Post(models.Model):
     def get_formated_date(self):
         return format_time_ago(self.date_created)
 
+    def save(self,*args, **kwargs) -> None:
+        self.slug = slugify(self.title)
+        return super().save(*args, **kwargs)
+    
     def delete(self, *args, **kwargs):
         if self.image:
-            # print(dir(self.image.))
             os.remove(self.image.path)
         return super().delete(*args, **kwargs)
 
