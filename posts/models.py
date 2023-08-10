@@ -69,13 +69,14 @@ class Post(models.Model):
         return self.save()
     @property
     def get_absolute_url(self):
-        return reverse("post_detail", kwargs={"pk": self.pk})
+        return reverse("post_detail", kwargs={"slug": self.slug})
 
     @property
     def get_formated_date(self):
         return format_time_ago(self.date_created)
 
     def save(self,*args, **kwargs) -> None:
+        self.title = self.title.capitalize()
         self.slug = slugify(self.title)
         return super().save(*args, **kwargs)
     

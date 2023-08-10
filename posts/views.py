@@ -50,7 +50,7 @@ class CreatePostView(generics.CreateAPIView, StaffEditOnly):
         
         serializer.save()
         
-        return Response({'success':"post uploadedsuccesfully"})
+        return Response({'success':"post uploaded succesfully"})
 
 
 
@@ -78,13 +78,34 @@ class PostDetailApiView(generics.RetrieveAPIView):
     
 class EditDeletePostView(generics.RetrieveUpdateDestroyAPIView,StaffEditOnly):
     queryset = Post.objects.all()
-    serializer_class = PostDetailSerializer
+    serializer_class = PostCreateSerializer
     lookup_field = 'slug'
     
     def get_object(self):
         queryset = self.get_queryset()
         obj = queryset.get(slug=self.kwargs['slug'])
         return obj
+    
+    def patch(self, request, *args, **kwargs):
+        category = request.data.get('category')
+        qs = Categories.objects.get(category=category)
+        image =  request.data.get('image')
+        print(request.data)
+       
+        category_data = CategorySerializer(qs,many=False)
+        new_dict ={
+            'title':request.data.get('title'),
+            'post':request.data.get('post'),
+            'image':image if image else None,
+            'category':category_data.data
+        }
+        obj = Post.objects.get(slug=kwargs.get('slug'))
+        serializer = self.get_serializer(obj,data=new_dict)
+        serializer.is_valid(raise_exception=True)
+        
+        serializer.save()
+        
+        return Response({'success':"post uploaded succesfully"},status=200)
 
 
 

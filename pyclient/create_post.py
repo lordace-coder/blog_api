@@ -15,12 +15,11 @@ In this example, we replace the axios.post() call with the fetch() function to m
 Remember to adjust the API endpoint URL ('/api/auth/login/') and the error handling approach according to your specific backend API structure and requirements.
 Using fetch, you can handle HTTP requests in your React project without adding an additional library like axios.
 I hope this helps! Let me know if you have any further questions.""",
-    "title":"Using Fetch API",
+    "title":"To be edited",
 
 }
-with open("images/slide-1.jpg","rb") as img:
-    data['image'] = img
-    response = requests.post(URL, data=data, headers=headers)
+
+response = requests.post(URL, data=data, headers=headers)
 
 if response.status_code == requests.codes.created:
     print("status code", response.status_code)

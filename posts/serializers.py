@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from .models import Carousel, Categories, Comments, Post
+from .validators import validate_title
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -101,6 +102,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class PostCreateSerializer(serializers.ModelSerializer):
     comment = CommentSerializer(read_only = True,many=True)
     category = CategorySerializer(required=False,many=False)
+    title = serializers.CharField(validators=[validate_title])
     class Meta:
         model = Post
         fields = [
@@ -116,9 +118,16 @@ class PostCreateSerializer(serializers.ModelSerializer):
         category = validated_data.pop('category')
         new_category = Categories.objects.filter(**category)
         new_post = Post.objects.create(**validated_data)
-        x= new_post
         new_post.category.set(new_category)
 
         new_post.save()
         return new_post
+    
+    def update(self, instance, validated_data):
+        category = validated_data.pop('category')
+        category_obj = Categories.objects.filter(**category)
+        instance.category.set(category_obj)
+        instance.save()
+        return super().update(instance, validated_data)
+
         
