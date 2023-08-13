@@ -1,5 +1,6 @@
+from django.db.models import Q
 from django.http import Http404
-from rest_framework import generics, status
+from rest_framework import generics, pagination, status
 from rest_framework.authentication import (SessionAuthentication,
                                            TokenAuthentication)
 from rest_framework.decorators import api_view
@@ -7,6 +8,7 @@ from rest_framework.response import Response
 
 from .mixins import StaffEditOnly, UserEditOnly
 from .models import Categories, Comments, Post, ViewPost
+from .pagination import StandardResultsSetPagination
 from .serializers import (CategorySerializer, CommentSerializer,
                           PostCreateSerializer, PostDetailSerializer,
                           PostListSerializers)
@@ -22,8 +24,15 @@ def index(request):
 
 class PostsApiView(generics.ListAPIView):
     serializer_class = PostListSerializers
-    queryset = Post.objects.all().order_by('?')
-
+    queryset = Post.objects.all()
+    pagination_class = StandardResultsSetPagination
+    
+    def get_queryset(self):
+        query = self.request.GET.get('q')
+        if query and not query == ' ':
+            look_up = Q(title__icontains = query)|Q(post__icontains=query)
+            return super().get_queryset().filter(look_up )
+        return super().get_queryset().order_by('?')
 class CreatePostView(generics.CreateAPIView, StaffEditOnly):
     serializer_class = PostCreateSerializer
     queryset = Post.objects.all()
@@ -90,7 +99,6 @@ class EditDeletePostView(generics.RetrieveUpdateDestroyAPIView,StaffEditOnly):
         category = request.data.get('category')
         qs = Categories.objects.get(category=category)
         image =  request.data.get('image')
-        print(request.data)
        
         category_data = CategorySerializer(qs,many=False)
         new_dict ={
@@ -112,7 +120,7 @@ class EditDeletePostView(generics.RetrieveUpdateDestroyAPIView,StaffEditOnly):
 class CreateComment(generics.ListCreateAPIView,UserEditOnly):
     serializer_class = CommentSerializer
     queryset = Comments.objects.all()
-    authentication_classes = [TokenAuthentication]
+
     
 
     
@@ -139,7 +147,7 @@ class CreateComment(generics.ListCreateAPIView,UserEditOnly):
 class GetPostBycategory(generics.ListAPIView):
     serializer_class = PostListSerializers
     queryset = Post.objects.all()
-
+    pagination_class = StandardResultsSetPagination
 
     def get_queryset(self):
         category = self.kwargs.get('category')

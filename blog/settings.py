@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -131,3 +132,12 @@ REST_FRAMEWORK = {
     # other settings...
 }
 CORS_ALLOW_ALL_ORIGINS = True
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME":timedelta(minutes=10),
+    "REFRESH_TOKEN_LIFETIME":timedelta(days=7),
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "UPDATE_LAST_LOGIN":True,
+    'TOKEN_SERIALIZER': 'users.custom_token_serializer.CustomTokenObtainPairSerializer',
+    "USER_ID_FIELD":"username"
+}

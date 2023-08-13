@@ -6,9 +6,9 @@ from . import views
 
 urlpatterns = [
     path('', views.index),
-    path('posts', views.PostsApiView.as_view()),
+    path('posts/', views.PostsApiView.as_view()),
     path('post/<slug:slug>', views.PostDetailApiView.as_view(),name="post_detail"),
-    path('posts/<str:category>',views.GetPostBycategory.as_view()),
+    path('posts/category/<str:category>',views.GetPostBycategory.as_view()),
     path('trending',views.TrendingPosts.as_view()),
     path('latest',views.LatestPosts.as_view()),
     path('create_post/',views.CreatePostView.as_view()),

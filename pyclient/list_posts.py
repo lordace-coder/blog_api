@@ -1,11 +1,11 @@
 import requests
 from get_auth_token import get_token
 
-URL = 'http://localhost:8000/edit_post/edited'
+URL = 'http://localhost:8000/posts'
 
 
 headers = {
-    'Authorization': f'Token {get_token()}'
+    'Authorization': f'Bearer {get_token()}'
 }
 
 data = {
@@ -14,7 +14,7 @@ data = {
 
 }
 
-response = requests.patch(URL, headers=headers,data=data)
+response = requests.get(URL, headers=headers,data=data)
 requests.status_codes
 if response.status_code == requests.codes.ok:
     print("status code", response.status_code)

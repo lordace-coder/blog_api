@@ -13,7 +13,6 @@ class CreateUserView(CreateAPIView):
 
 @api_view(['GET'])
 def user_info(request):
-    print(request.user)
     if request.user.is_authenticated:
         user = UserSerializer(request.user)
         return Response(user.data)
