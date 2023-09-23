@@ -158,7 +158,7 @@ class GetPostBycategory(generics.ListAPIView):
 
 class TrendingPosts(generics.ListAPIView):
     serializer_class = PostListSerializers
-    queryset = Post.objects.order_by('-views')[0:5]
+    queryset = Post.objects.order_by('-views')
 
 
 class LatestPosts(generics.ListAPIView):
