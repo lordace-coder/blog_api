@@ -12,7 +12,7 @@ class CommentSerializer(serializers.ModelSerializer):
         exclude = ('date_created','id')
 
     def get_date(self, obj):
-       
+
         return obj.get_formated_date
 
 
@@ -41,7 +41,7 @@ class PostListSerializers(serializers.ModelSerializer):
 
     def get_intro(self,obj):
         return obj.post[0:300]
-    
+
     def get_category(self,obj:Post):
         qs = obj.category.first()
         return f"{qs}"
@@ -77,7 +77,7 @@ class PostDetailSerializer(serializers.ModelSerializer):
 
     def get_author(self,obj):
         return "ZenBlog"
-    
+
     def get_comment_count(self,obj):
         return obj.comment.count()
     def get_category(self,obj:Post):
@@ -102,7 +102,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class PostCreateSerializer(serializers.ModelSerializer):
     comment = CommentSerializer(read_only = True,many=True)
     category = CategorySerializer(required=False,many=False)
-    title = serializers.CharField(validators=[validate_title])
+
     class Meta:
         model = Post
         fields = [
@@ -111,9 +111,9 @@ class PostCreateSerializer(serializers.ModelSerializer):
             "image",
             "post",
             "comment"
-      
+
         ]
-    
+
     def create(self, validated_data):
         category = validated_data.pop('category')
         new_category = Categories.objects.filter(**category)
@@ -122,7 +122,7 @@ class PostCreateSerializer(serializers.ModelSerializer):
 
         new_post.save()
         return new_post
-    
+
     def update(self, instance, validated_data):
         category = validated_data.pop('category')
         category_obj = Categories.objects.filter(**category)
@@ -130,4 +130,4 @@ class PostCreateSerializer(serializers.ModelSerializer):
         instance.save()
         return super().update(instance, validated_data)
 
-        
+

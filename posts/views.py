@@ -18,7 +18,6 @@ from .serializers import (CategorySerializer, CommentSerializer,
 def index(request):
     categories = Categories.objects.all()
     data = CategorySerializer(categories,many = True)
-    
     return Response(data.data)
 
 
@@ -26,7 +25,7 @@ class PostsApiView(generics.ListAPIView):
     serializer_class = PostListSerializers
     queryset = Post.objects.all()
     pagination_class = StandardResultsSetPagination
-    
+
     def get_queryset(self):
         query = self.request.GET.get('q')
         if query and not query == ' ':
@@ -36,9 +35,10 @@ class PostsApiView(generics.ListAPIView):
 class CreatePostView(generics.CreateAPIView, StaffEditOnly):
     serializer_class = PostCreateSerializer
     queryset = Post.objects.all()
-    
+
     def post(self, request, *args, **kwargs):
         category = request.data.get('category')
+        print('data',request.data)
         # for rest framework view
         if not category:
             category = request.data.get('category.category')
@@ -56,9 +56,9 @@ class CreatePostView(generics.CreateAPIView, StaffEditOnly):
         }
         serializer = self.get_serializer(data=new_dict)
         serializer.is_valid(raise_exception=True)
-        
+
         serializer.save()
-        
+
         return Response({'success':"post uploaded succesfully"})
 
 
@@ -71,48 +71,49 @@ class PostDetailApiView(generics.RetrieveAPIView):
 
 
 
-    
+
     #  todo: work on this
     def get_object(self):
         queryset = self.get_queryset()
         obj = queryset.get(slug=self.kwargs['slug'])
         user =self.request.user
         if user.is_authenticated and not ViewPost.seen(post = obj,user=user):
-            obj.view_post(user=user)           
-        return obj   
+            obj.view_post(user=user)
+        return obj
 
 
-    
-    
-    
+
+
+
 class EditDeletePostView(generics.RetrieveUpdateDestroyAPIView,StaffEditOnly):
     queryset = Post.objects.all()
     serializer_class = PostCreateSerializer
     lookup_field = 'slug'
-    
+
     def get_object(self):
         queryset = self.get_queryset()
         obj = queryset.get(slug=self.kwargs['slug'])
         return obj
-    
+
     def patch(self, request, *args, **kwargs):
         category = request.data.get('category')
         qs = Categories.objects.get(category=category)
         image =  request.data.get('image')
-       
+
         category_data = CategorySerializer(qs,many=False)
         new_dict ={
             'title':request.data.get('title'),
             'post':request.data.get('post'),
-            'image':image if image else None,
             'category':category_data.data
         }
+        if image:
+            new_dict['image'] = image
         obj = Post.objects.get(slug=kwargs.get('slug'))
         serializer = self.get_serializer(obj,data=new_dict)
         serializer.is_valid(raise_exception=True)
-        
+
         serializer.save()
-        
+
         return Response({'success':"post uploaded succesfully"},status=200)
 
 
@@ -121,27 +122,27 @@ class CreateComment(generics.ListCreateAPIView,UserEditOnly):
     serializer_class = CommentSerializer
     queryset = Comments.objects.all()
 
-    
 
-    
+
+
     def post(self, request, *args, **kwargs):
         post_slug = kwargs.get('slug')
         data = dict()
-        comment = request.POST.get('comment') 
+        comment = request.POST.get('comment')
         data['comment'] = comment if comment else request.data.get('comment')
         data['author'] = request.user.username
         try:
             post = Post.objects.get(slug=post_slug)
         except Post.DoesNotExist:
             return Response({'error': 'Post not found'}, status=status.HTTP_404_NOT_FOUND)
-    
+
         serializer = self.get_serializer(data=data)
-       
+
         serializer.is_valid(raise_exception=True)
         comment = serializer.save(author=request.user)
         post.comment.add(comment)
         post.save()
-    
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class GetPostBycategory(generics.ListAPIView):
