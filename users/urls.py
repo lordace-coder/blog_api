@@ -1,5 +1,4 @@
-from django.urls import path
-
+from django.urls import include, path
 from rest_framework_simplejwt.views import (TokenObtainPairView,
                                             TokenRefreshView, TokenVerifyView)
 
@@ -12,5 +11,8 @@ urlpatterns = [
     # simple JWT views
     path('get_token/',TokenObtainPairView.as_view(),name="token_obtain"),
     path('refresh_token/',TokenRefreshView.as_view(),name='refresh_token'),
-    path('verify_token/',TokenVerifyView.as_view(),name='verify_token')
+    path('verify_token/',TokenVerifyView.as_view(),name='verify_token'),
+    
+    # forgot password urls
+    path('forgot-password/',include('forgot_password.urls')),
 ]

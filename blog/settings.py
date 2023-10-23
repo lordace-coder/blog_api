@@ -9,10 +9,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-76=%fvyt_^#%jecb6ok$mdq7)084_xzjnty)syx^+qw-7bf*_3'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
-    'lordace.pythonanywhere.com'
+    'lordace.pythonanywhere.com',
+    '127.0.0.1'
     ]
 
 
@@ -30,6 +31,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'users',
+    'forgot_password',
 
 ]
 
@@ -143,3 +145,22 @@ SIMPLE_JWT = {
     'TOKEN_SERIALIZER': 'users.custom_token_serializer.CustomTokenObtainPairSerializer',
     "USER_ID_FIELD":"username"
 }
+
+
+
+
+# ! FORGOT PASSWORD SETTINGS
+FORGOT_PASSWORD_CONFIG = {
+    'mail_template':"""
+    Your Recovery Token is #token, please guard it wisely.
+    """
+}
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'bloggernetlify@gmail.com'
+EMAIL_HOST_PASSWORD = 'ziihipjirjkojfvg'
+EMAIL_PORT = 465
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+EMAIL_TIMEOUT = 50
