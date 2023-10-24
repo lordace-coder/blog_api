@@ -6,6 +6,7 @@ from rest_framework import generics, pagination, status
 from rest_framework.authentication import (SessionAuthentication,
                                            TokenAuthentication)
 from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
 from .mixins import StaffEditOnly, UserEditOnly
@@ -34,13 +35,16 @@ class PostsApiView(generics.ListAPIView):
             look_up = Q(title__icontains = query)|Q(post__icontains=query)
             return super().get_queryset().filter(look_up )
         return super().get_queryset().order_by('?')
-class CreatePostView(generics.CreateAPIView, StaffEditOnly):
+
+
+class CreatePostView( StaffEditOnly,generics.CreateAPIView):
     serializer_class = PostCreateSerializer
     queryset = Post.objects.all()
 
+    def get(self,*args,**kwargs):
+        return Response(f"{self.permission_classes}")
     def post(self, request, *args, **kwargs):
         category = request.data.get('category')
-        print('data',request.data)
         # for rest framework view
         if not category:
             category = request.data.get('category.category')
@@ -87,7 +91,7 @@ class PostDetailApiView(generics.RetrieveAPIView):
 
 
 
-class EditDeletePostView(generics.RetrieveUpdateDestroyAPIView,StaffEditOnly):
+class EditDeletePostView(StaffEditOnly,generics.RetrieveUpdateDestroyAPIView):
     queryset = Post.objects.all()
     serializer_class = PostCreateSerializer
     lookup_field = 'slug'
@@ -120,7 +124,7 @@ class EditDeletePostView(generics.RetrieveUpdateDestroyAPIView,StaffEditOnly):
 
 
 
-class CreateComment(generics.ListCreateAPIView,UserEditOnly):
+class CreateComment(UserEditOnly,generics.ListCreateAPIView):
     serializer_class = CommentSerializer
     queryset = Comments.objects.all()
 

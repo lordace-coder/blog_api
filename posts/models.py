@@ -2,6 +2,7 @@ import os
 from datetime import timezone
 from typing import Any, Dict, Iterable, Optional, Tuple
 
+from cloudinary.models import CloudinaryField
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.urls import reverse
@@ -17,7 +18,7 @@ user = get_user_model()
 class Carousel(models.Model):
     title = models.TextField(max_length=40)
     text = models.TextField(max_length=200)
-    image = models.ImageField(upload_to='files/images/carousel_img')
+    image = CloudinaryField()
     link = models.URLField(blank=True, null=True)
 
 
@@ -45,7 +46,7 @@ class Post(models.Model):
     title = models.TextField(max_length=100)
     post = models.TextField()
     slug = models.SlugField(max_length=100,null=True,blank=True)
-    image = models.ImageField(blank=True, null=True, upload_to="images/posts")
+    image = CloudinaryField(blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     category = models.ManyToManyField(
         Categories, related_name='categories', blank=True, )

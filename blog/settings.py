@@ -2,6 +2,8 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+from cloudinary import config as cloudConfig
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -13,10 +15,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'lordace.pythonanywhere.com',
-    '127.0.0.1'
+    
     ]
 
-
+if DEBUG:
+    ALLOWED_HOSTS.append('127.0.0.1')
 # Application definition
 
 INSTALLED_APPS = [
@@ -31,6 +34,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'users',
+    'cloudinary',
     'forgot_password',
 
 ]
@@ -115,7 +119,11 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-
+cloudConfig( 
+  cloud_name = "dinoc8svf", 
+  api_key = "524857684224764", 
+  api_secret = "GmlN577TzHP5YShkZFL2gBCw8V8" 
+)
 # * FOR MEDIA
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
