@@ -21,7 +21,7 @@ class Token(models.Model):
     token = models.CharField(max_length=10,blank = True,null = True)
     user = models.ForeignKey(user_model,on_delete=models.CASCADE)
     expiry = models.DateTimeField(blank = True,null = True)
-    created_at = models.DateTimeField(auto_created=True)
+    created_at = models.DateTimeField(auto_created=True,auto_now=True)
 
     # todo clear all expired tokens with this method
     @staticmethod
@@ -36,7 +36,7 @@ class Token(models.Model):
             ...
     
     @staticmethod
-    def validate_user_token(self,user:user_model,token:str)->bool:
+    def validate_user_token(user:user_model,token:str)->bool:
         """
         checks if token is valid
         """
@@ -60,13 +60,8 @@ class Token(models.Model):
                 token_instance.delete()
                 
         if not self.expiry:
-            self.expiry = self.created_at + config.get('valid_time',timedelta(hours=1))
-            # * generate token
-            token_length = config.get('token_length') if config.get('token_length') else 4
-            if config.get('numbers_only'):
-                self.token = generate_token(token_length,numbers_only=config['numbers_only'])
-                return super().save(*args, **kwargs)
             
-            self.token = generate_token(token_length)
+            self.expiry = datetime.now()+ config.get('valid_time',timedelta(hours=1))
+            self.token = generate_token(4)
             
         return super().save(*args, **kwargs)

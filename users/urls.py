@@ -5,6 +5,8 @@ from rest_framework_simplejwt.views import (TokenObtainPairView,
 from . import views
 
 urlpatterns = [
+     path('forgot-password/',include('forgot_password.urls')),
+
     path("create_user",views.CreateUserView.as_view()),
     path("get_userdata",views.user_info),
     
@@ -12,7 +14,5 @@ urlpatterns = [
     path('get_token/',TokenObtainPairView.as_view(),name="token_obtain"),
     path('refresh_token/',TokenRefreshView.as_view(),name='refresh_token'),
     path('verify_token/',TokenVerifyView.as_view(),name='verify_token'),
-    
-    # forgot password urls
-    path('forgot-password/',include('forgot_password.urls')),
+
 ]

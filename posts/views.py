@@ -19,15 +19,6 @@ from .serializers import (CategorySerializer, CommentSerializer,
 @api_view(['GET'])
 def index(request):
     categories = Categories.objects.all()
-    try:
-        send_mail(
-        subject='Add an eye-catching subject',
-        message='Write an amazing message',
-        from_email=settings.EMAIL_HOST_USER,
-        recipient_list=['chiderapatrick75@gmail.com'])
-    except Exception as err:
-        print(err)
-    
     data = CategorySerializer(categories,many = True)
     return Response(data.data)
 
