@@ -15,6 +15,7 @@ urlpatterns = [
     path('edit_post/<slug:slug>',views.EditDeletePostView.as_view()),
     path('comment/<slug:slug>',views.CreateComment.as_view()),
     path('comment/',views.CreateComment.as_view()),
+    path('featured-category',views.get_featured_category),
 ]
 
 

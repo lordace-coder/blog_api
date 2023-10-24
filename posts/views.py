@@ -171,3 +171,6 @@ class TrendingPosts(generics.ListAPIView):
 class LatestPosts(generics.ListAPIView):
     serializer_class = PostListSerializers
     queryset = Post.objects.order_by('-date_created','-views')[0:10]
+
+def get_featured_category(request):
+    return Response('+18')
