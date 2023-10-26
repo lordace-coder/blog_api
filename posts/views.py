@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.db.models import Q
 from django.http import Http404
@@ -45,12 +46,13 @@ class CreatePostView( StaffEditOnly,generics.CreateAPIView):
         return Response(f"{self.permission_classes}")
     def post(self, request, *args, **kwargs):
         category = request.data.get('category')
+        user = request.user
         # for rest framework view
         if not category:
             category = request.data.get('category.category')
         image = request.data.get('image')
         if not category:
-            qs = Categories.objects.get(category="Business")
+            qs = Categories.objects.get(category="+18")
         else:
             qs = Categories.objects.get(category=category)
         category_data = CategorySerializer(qs,many=False)
@@ -63,7 +65,7 @@ class CreatePostView( StaffEditOnly,generics.CreateAPIView):
         serializer = self.get_serializer(data=new_dict)
         serializer.is_valid(raise_exception=True)
 
-        serializer.save()
+        serializer.save(author = user)
 
         return Response({'success':"post uploaded succesfully"})
 
@@ -102,25 +104,30 @@ class EditDeletePostView(StaffEditOnly,generics.RetrieveUpdateDestroyAPIView):
         return obj
 
     def patch(self, request, *args, **kwargs):
-        category = request.data.get('category')
-        qs = Categories.objects.get(category=category)
-        image =  request.data.get('image')
-
-        category_data = CategorySerializer(qs,many=False)
-        new_dict ={
-            'title':request.data.get('title'),
-            'post':request.data.get('post'),
-            'category':category_data.data
-        }
-        if image:
-            new_dict['image'] = image
+        user:User = request.user
         obj = Post.objects.get(slug=kwargs.get('slug'))
-        serializer = self.get_serializer(obj,data=new_dict)
-        serializer.is_valid(raise_exception=True)
+        if obj.author == user or user.is_superuser:
+            category = request.data.get('category')
+            qs = Categories.objects.get(category=category)
+            image =  request.data.get('image')
 
-        serializer.save()
+            category_data = CategorySerializer(qs,many=False)
+            new_dict ={
+                'title':request.data.get('title'),
+                'post':request.data.get('post'),
+                'category':category_data.data
+            }
+            if image:
+                new_dict['image'] = image
+            obj = Post.objects.get(slug=kwargs.get('slug'))
+            serializer = self.get_serializer(obj,data=new_dict)
+            serializer.is_valid(raise_exception=True)
 
-        return Response({'success':"post uploaded succesfully"},status=200)
+            serializer.save()
+
+            return Response({'success':"post uploaded succesfully"},status=200)
+        else:
+            return Response({"error":"permission denied","suggestions":"use superuser,use owner of post"},status=401)
 
 
 

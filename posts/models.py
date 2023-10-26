@@ -54,7 +54,7 @@ class Post(models.Model):
     views = models.IntegerField(default=0)
     comment = models.ManyToManyField(
         Comments, related_name='user_comments', blank=True)
-
+    author = models.ForeignKey(user,on_delete=models.CASCADE)
     def view_post(self, user: user):
         qs = ViewPost.objects.filter(post=self, user=user)
         if not qs.exists():

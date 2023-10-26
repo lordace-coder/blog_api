@@ -46,7 +46,7 @@ class PostListSerializers(serializers.ModelSerializer):
         qs = obj.category.first()
         return f"{qs}"
     def get_author(self,obj):
-        return "ZenBlog"
+        return obj.author.username
 
 
 class PostDetailSerializer(serializers.ModelSerializer):
@@ -76,7 +76,7 @@ class PostDetailSerializer(serializers.ModelSerializer):
         return obj.get_formated_date
 
     def get_author(self,obj):
-        return "ZenBlog"
+        return obj.author.username
 
     def get_comment_count(self,obj):
         return obj.comment.count()
