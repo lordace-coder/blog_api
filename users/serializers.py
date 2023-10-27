@@ -1,6 +1,9 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
+from posts.serializers import UserProfilePostListSerializers
+
+from .models import UserProfile
 from .validators import validate_email
 
 
@@ -21,3 +24,23 @@ class UserSerializer(serializers.ModelSerializer):
     
     def get_is_staff(self,obj:User):
         return obj.is_staff
+
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source = 'user.username',read_only=True)
+    posts = serializers.SerializerMethodField()
+    class Meta:
+        model = UserProfile
+        fields = (
+            "username",
+            "full_name",
+            "image",
+            "mobile",
+            "address",
+            "posts"
+        )
+        
+    def get_posts(self,obj):
+        posts = obj.get_posts_by_user()
+        return  UserProfilePostListSerializers(posts,many=True).data

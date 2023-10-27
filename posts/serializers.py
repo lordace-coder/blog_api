@@ -131,3 +131,32 @@ class PostCreateSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
+
+class UserProfilePostListSerializers(serializers.ModelSerializer):
+    intro = serializers.SerializerMethodField()
+    date = serializers.SerializerMethodField()
+    category = serializers.SerializerMethodField()
+    class Meta:
+        model = Post
+        fields = [
+            "title",
+            "views",
+            "category",
+            "image",
+            "intro",
+            "author",
+       
+            'date',
+            'slug'
+        ]
+    def get_date(self, obj):
+        return obj.get_formated_date
+
+    def get_intro(self,obj):
+        return obj.post[0:300]
+
+    def get_category(self,obj:Post):
+        qs = obj.category.first()
+        return f"{qs}"
+
+
