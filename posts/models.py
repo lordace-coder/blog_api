@@ -46,7 +46,7 @@ class Post(models.Model):
     title = models.TextField(max_length=100)
     post = models.TextField()
     slug = models.SlugField(max_length=100,null=True,blank=True)
-    image = CloudinaryField(blank=True, null=True)
+    image =models.ImageField(blank = True,null = True,upload_to="images/posts")
     date_created = models.DateTimeField(auto_now_add=True)
     category = models.ManyToManyField(
         Categories, related_name='categories', blank=True, )
