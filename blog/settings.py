@@ -2,7 +2,7 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
-from cloudinary import config as cloudConfig
+from cloudinary import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -119,11 +119,15 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-cloudConfig(
+CLOUDINARY_URL="cloudinary://524857684224764:GmlN577TzHP5YShkZFL2gBCw8V8@dinoc8svf"
+config(
   cloud_name = "dinoc8svf",
   api_key = "524857684224764",
   api_secret = "GmlN577TzHP5YShkZFL2gBCw8V8"
 )
+
+import cloudinary.uploader
+import cloudinary.api
 # * FOR MEDIA
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
