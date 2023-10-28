@@ -17,7 +17,7 @@ class UserProfile(models.Model):
     
     
     def get_posts_by_user(self):
-        qs = Post.objects.filter(author = self.user)
+        qs = Post.objects.filter(author = self.user)[0:11]
         if not qs.exists():
             return None
         return qs

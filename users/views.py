@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework.decorators import api_view
-from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView,RetrieveAPIView
+from rest_framework.generics import (CreateAPIView, RetrieveAPIView,
+                                     RetrieveUpdateAPIView)
 from rest_framework.response import Response
 
 from posts.mixins import StaffEditOnly
@@ -44,10 +45,15 @@ class UserProfileApiView(StaffEditOnly,RetrieveUpdateAPIView):
 
         return obj
 
+
 class UserProfileVisitorsView(RetrieveAPIView):
     serializer_class = UserProfileSerializer
     queryset = UserProfile.objects.all()
 
     def get_object(self):
-        name = self.kwargs.get("author")
-        self.get_queryset().filter(
+        author = self.kwargs.get("author")
+        qs = self.get_queryset()
+        user = User.objects.get(username = author)
+        profile = qs.get(user = user)
+        return profile
+        

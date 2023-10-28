@@ -180,4 +180,5 @@ class LatestPosts(generics.ListAPIView):
     queryset = Post.objects.order_by('-date_created','-views')[0:10]
 
 def get_featured_category(request):
-    return Response('+18')
+    category = Categories.objects.filter(category__icontains="romance").first()
+    return Response(category.category)
