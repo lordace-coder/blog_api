@@ -48,12 +48,18 @@ class UserProfileSerializer(serializers.ModelSerializer):
         )
 
     def get_post_count(self,obj):
+        count = 0
         posts = obj.get_posts_by_user()
+        if not posts:
+            return count
         count= posts.count()
         return count
 
     def get_perc_posts(self,obj):
+        count = 0
         posts = obj.get_posts_by_user()
+        if not posts:
+            return count
         count= posts.count()
         perc = (count/150) *100
         return perc

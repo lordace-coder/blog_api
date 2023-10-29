@@ -46,7 +46,7 @@ class Post(models.Model):
     title = models.TextField(max_length=100)
     post = models.TextField()
     slug = models.SlugField(max_length=100,null=True,blank=True)
-    image =models.ImageField(blank = True,null = True,upload_to="images/posts")
+    image = CloudinaryField(blank = True,null = True)
     date_created = models.DateTimeField(auto_now_add=True)
     category = models.ManyToManyField(
         Categories, related_name='categories', blank=True, )
@@ -64,7 +64,7 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
-  
+
     def mark_seen(self):
         self.views +=1
         return self.save()
@@ -80,7 +80,7 @@ class Post(models.Model):
         self.title = self.title.capitalize()
         self.slug = slugify(self.title)
         return super().save(*args, **kwargs)
-    
+
     def delete(self, *args, **kwargs):
         if self.image:
             os.remove(self.image.path)

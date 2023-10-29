@@ -166,7 +166,7 @@ class GetPostBycategory(generics.ListAPIView):
     def get_queryset(self):
         category = self.kwargs.get('category')
         qs = Categories.objects.filter(category__icontains=category).first()
-        new_queryset = self.queryset.filter(category=qs)
+        new_queryset = self.queryset.filter(category=qs).order_by("?")
         return new_queryset
 
 

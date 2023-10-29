@@ -119,11 +119,12 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-CLOUDINARY_URL="cloudinary://524857684224764:GmlN577TzHP5YShkZFL2gBCw8V8@dinoc8svf"
+#CLOUDINARY_URL="cloudinary://524857684224764:GmlN577TzHP5YShkZFL2gBCw8V8@dinoc8svf"
 config(
   cloud_name = "dinoc8svf",
   api_key = "524857684224764",
-  api_secret = "GmlN577TzHP5YShkZFL2gBCw8V8"
+  api_secret = "GmlN577TzHP5YShkZFL2gBCw8V8",
+  api_proxy = "http://proxy.server:3128"
 )
 
 import cloudinary.uploader
