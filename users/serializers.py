@@ -33,6 +33,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     posts = serializers.SerializerMethodField()
     post_count = serializers.SerializerMethodField()
     perc_posts = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
     class Meta:
         model = UserProfile
         fields = (
@@ -46,7 +47,13 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "post_count",
             "perc_posts",
         )
-
+    def get_image(self,obj):
+        image = None
+        if obj.image:
+            image = obj.image.url
+            image = str(image).replace('http','https')
+            
+        return image
     def get_post_count(self,obj):
         count = 0
         posts = obj.get_posts_by_user()

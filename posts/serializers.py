@@ -21,8 +21,10 @@ class PostListSerializers(serializers.ModelSerializer):
     intro = serializers.SerializerMethodField()
     date = serializers.SerializerMethodField()
     author = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
     category = serializers.SerializerMethodField()
     post_detail_url = serializers.HyperlinkedIdentityField(view_name='post_detail',lookup_field='slug')
+    
     class Meta:
         model = Post
         fields = [
@@ -36,7 +38,17 @@ class PostListSerializers(serializers.ModelSerializer):
             'date',
             'slug'
         ]
+    
+    def get_image(self,obj):
+        image = None
+        if obj.image:
+            image = obj.image.url
+            image = str(image).replace('http','https')
+            
+        return image
+    
     def get_date(self, obj):
+
         return obj.get_formated_date
 
     def get_intro(self,obj):
@@ -52,6 +64,7 @@ class PostListSerializers(serializers.ModelSerializer):
 class PostDetailSerializer(serializers.ModelSerializer):
     comment = CommentSerializer(read_only = True,many=True)
     author = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
     category = serializers.SerializerMethodField()
     date = serializers.SerializerMethodField()
     comment_count = serializers.SerializerMethodField(read_only = True)
@@ -72,6 +85,13 @@ class PostDetailSerializer(serializers.ModelSerializer):
             'slug'
         ]
 
+    def get_image(self,obj):
+        image = None
+        if obj.image:
+            image = obj.image.url
+            image = str(image).replace('http','https')
+        return image
+    
     def get_date(self, obj):
         return obj.get_formated_date
 
@@ -150,6 +170,7 @@ class UserProfilePostListSerializers(serializers.ModelSerializer):
             'slug'
         ]
     def get_date(self, obj):
+
         return obj.get_formated_date
 
     def get_intro(self,obj):
