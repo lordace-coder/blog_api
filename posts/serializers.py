@@ -74,7 +74,7 @@ class PostDetailSerializer(serializers.ModelSerializer):
         model = Post
         fields = [
             "title",
-            "is_permitted",
+         
             "views",
             "category",
             "image",
