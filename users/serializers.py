@@ -11,9 +11,10 @@ class UserSerializer(serializers.ModelSerializer):
     password= serializers.CharField(write_only=True)
     email = serializers.CharField(validators=[validate_email])
     is_staff =serializers.SerializerMethodField(read_only = True)
+    is_admin =serializers.SerializerMethodField(read_only = True)
     class Meta:
         model = User
-        fields = ['username','email','password','is_staff']
+        fields = ['username','email','password','is_staff',"is_admin"]
 
     def create(self, validated_data:dict):
         password = validated_data.pop('password')
@@ -24,6 +25,9 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_is_staff(self,obj:User):
         return obj.is_staff
+
+    def get_is_admin(self,obj):
+        return obj.is_superuser
 
 
 
@@ -52,7 +56,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         if obj.image:
             image = obj.image.url
             image = str(image).replace('http','https')
-            
+
         return image
     def get_post_count(self,obj):
         count = 0
