@@ -69,10 +69,12 @@ class PostDetailSerializer(serializers.ModelSerializer):
     date = serializers.SerializerMethodField()
     comment_count = serializers.SerializerMethodField(read_only = True)
     post_detail_url = serializers.HyperlinkedIdentityField(view_name='post_detail',lookup_field='slug')
+ 
     class Meta:
         model = Post
         fields = [
             "title",
+            "is_permitted",
             "views",
             "category",
             "image",

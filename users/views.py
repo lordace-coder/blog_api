@@ -1,8 +1,11 @@
 from django.contrib.auth.models import User
+from django.db.models import Q
+from rest_framework import serializers
 from rest_framework.decorators import api_view
 from rest_framework.generics import (CreateAPIView, RetrieveAPIView,
                                      RetrieveUpdateAPIView)
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from posts.mixins import StaffEditOnly
 from users.models import UserProfile
@@ -56,4 +59,21 @@ class UserProfileVisitorsView(RetrieveAPIView):
         user = User.objects.get(username = author)
         profile = qs.get(user = user)
         return profile
-        
+
+
+class UserSearchView(APIView):
+    serializer_class = UserSerializer
+
+    def get(self, request):
+        username = request.query_params.get("username")
+
+        if username is None:
+            raise serializers.ValidationError("Username is required.")
+
+        users = User.objects.filter(
+            Q(username__icontains=username) | Q(email__icontains=username)
+        ).filter(is_staff = True)
+
+        serializer = self.serializer_class(users, many=True)
+
+        return Response(serializer.data)

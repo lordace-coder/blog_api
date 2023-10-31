@@ -85,6 +85,8 @@ class PostDetailApiView(generics.RetrieveAPIView):
         queryset = self.get_queryset()
         obj = queryset.get(slug=self.kwargs['slug'])
         user =self.request.user
+        is_permitted = (obj.author == self.request.user) or self.request.user.is_superuser
+
         if user.is_authenticated and not ViewPost.seen(post = obj,user=user):
             obj.view_post(user=user)
         return obj
