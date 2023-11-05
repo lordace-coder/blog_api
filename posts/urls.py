@@ -6,6 +6,7 @@ from . import views
 
 urlpatterns = [
     path('', views.index),
+    path('redirect',views.redirect_page),
     path('posts/', views.PostsApiView.as_view()),
     path('post/<slug:slug>', views.PostDetailApiView.as_view(),name="post_detail"),
     path('posts/category/<str:category>',views.GetPostBycategory.as_view()),

@@ -9,12 +9,13 @@ from .validators import validate_email
 
 class UserSerializer(serializers.ModelSerializer):
     password= serializers.CharField(write_only=True)
+    image = serializers.SerializerMethodField(read_only=True)
     email = serializers.CharField(validators=[validate_email])
     is_staff =serializers.SerializerMethodField(read_only = True)
     is_admin =serializers.SerializerMethodField(read_only = True)
     class Meta:
         model = User
-        fields = ['username','email','password','is_staff',"is_admin"]
+        fields = ['username','email','password','is_staff',"is_admin","image"]
 
     def create(self, validated_data:dict):
         password = validated_data.pop('password')
@@ -29,7 +30,15 @@ class UserSerializer(serializers.ModelSerializer):
     def get_is_admin(self,obj):
         return obj.is_superuser
 
+    def get_image(self,obj):
+        q,is_created = UserProfile.objects.get_or_create(user=obj)
 
+        image = ''
+        if q.image:
+            image = q.image.url
+            image = str(image).replace('http','https')
+
+        return image
 
 class UserProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source = 'user.username',read_only=True)
@@ -76,4 +85,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         return perc
     def get_posts(self,obj):
         posts = obj.get_posts_by_user()
-        return  UserProfilePostListSerializers(posts,many=True).data
+        q = None
+        if posts:
+            q = posts[0:10]
+        return  UserProfilePostListSerializers(q,many=True).data

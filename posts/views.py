@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.shortcuts import render
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.db.models import Q
@@ -25,6 +26,8 @@ def index(request):
     return Response(data.data)
 
 
+def redirect_page(request):
+    return render(request,'index.html',{})
 class PostsApiView(generics.ListAPIView):
     serializer_class = PostListSerializers
     queryset = Post.objects.all()
