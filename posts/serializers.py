@@ -24,7 +24,7 @@ class PostListSerializers(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
     category = serializers.SerializerMethodField()
     post_detail_url = serializers.HyperlinkedIdentityField(view_name='post_detail',lookup_field='slug')
-    
+
     class Meta:
         model = Post
         fields = [
@@ -38,15 +38,15 @@ class PostListSerializers(serializers.ModelSerializer):
             'date',
             'slug'
         ]
-    
+
     def get_image(self,obj):
         image = None
         if obj.image:
             image = obj.image.url
             image = str(image).replace('http','https')
-            
+
         return image
-    
+
     def get_date(self, obj):
 
         return obj.get_formated_date
@@ -71,12 +71,12 @@ class PostDetailSerializer(serializers.ModelSerializer):
     post_detail_url = serializers.HyperlinkedIdentityField(view_name='post_detail',lookup_field='slug')
     likes_count = serializers.SerializerMethodField()
     dislikes_count = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Post
         fields = [
             "title",
-         
+
             "views",
             "category",
             "image",
@@ -92,19 +92,19 @@ class PostDetailSerializer(serializers.ModelSerializer):
         ]
     def get_likes_count(self,obj):
         return obj.likes.count()
-    
-    
+
+
     def get_dislikes_count(self,obj):
         return obj.dislikes.count()
-    
-    
+
+
     def get_image(self,obj):
         image = None
         if obj.image:
             image = obj.image.url
             image = str(image).replace('http','https')
         return image
-    
+
     def get_date(self, obj):
         return obj.get_formated_date
 
@@ -116,12 +116,23 @@ class PostDetailSerializer(serializers.ModelSerializer):
     def get_category(self,obj:Post):
         qs = obj.category.first()
         return f"{qs}"
+
+
+
 class CarouselSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
     class Meta:
         model = Carousel
-        fields = "__all__"
+        fields = (
+            "image"
+            )
 
-
+    def get_image(self,obj):
+        image = None
+        if obj.image:
+            image = obj.image.url
+            image = str(image).replace('http','https')
+        return image
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -178,7 +189,7 @@ class UserProfilePostListSerializers(serializers.ModelSerializer):
             "image",
             "intro",
             "author",
-       
+
             'date',
             'slug'
         ]

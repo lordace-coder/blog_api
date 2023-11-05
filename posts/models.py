@@ -84,10 +84,7 @@ class Post(models.Model):
         self.slug = slugify(self.title)
         return super().save(*args, **kwargs)
 
-    def delete(self, *args, **kwargs):
-        if self.image:
-            os.remove(self.image.path)
-        return super().delete(*args, **kwargs)
+
 
 
 # * LIKE USER POST

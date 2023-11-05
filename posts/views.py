@@ -13,9 +13,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .mixins import StaffEditOnly, UserEditOnly
-from .models import Categories, Comments, Post, ViewPost
+from .models import Categories, Comments, Post, ViewPost,Carousel
 from .pagination import StandardResultsSetPagination
-from .serializers import (CategorySerializer, CommentSerializer,
+from .serializers import (CategorySerializer, CommentSerializer,CarouselSerializer,
                           PostCreateSerializer, PostDetailSerializer,
                           PostListSerializers)
 
@@ -26,7 +26,11 @@ def index(request):
     data = CategorySerializer(categories,many = True)
     return Response(data.data)
 
-
+@api_view(['GET'])
+def carousels(request):
+    qs = Carousel.objects.all()
+    data = CarouselSerializer(qs,many = True)
+    return Response(data.data)
 
 class PostsApiView(generics.ListAPIView):
     serializer_class = PostListSerializers
@@ -193,7 +197,7 @@ def get_featured_category(request):
 @api_view(['POST'])
 def contact_user(request):
     data = request.POST
-    
+
     try:
         send_mail(
             subject=data.get('subject'),
@@ -210,16 +214,16 @@ def contact_user(request):
 
 class PostUserAction(UserEditOnly,APIView):
     queryset = Post.objects.all()
-    
+
     def get_object(self):
         qs = self.queryset
         return qs.get(slug = self.kwargs.get('slug'))
-        
-    
+
+
     def get(self,*args, **kwargs):
         actions = ['like','dislike']
         user_action = kwargs.get('action')
-             
+
         # check if action is valid
         if user_action in actions:
             obj = self.get_object()
