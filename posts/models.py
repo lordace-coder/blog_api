@@ -48,6 +48,8 @@ class Post(models.Model):
     slug = models.SlugField(max_length=100,null=True,blank=True)
     image = CloudinaryField(blank = True,null = True)
     date_created = models.DateTimeField(auto_now_add=True)
+    likes = models.ManyToManyField(user,related_name="likes",blank=True)
+    dislikes = models.ManyToManyField(user,related_name="dislikes",blank=True)
     category = models.ManyToManyField(
         Categories, related_name='categories', blank=True, )
 

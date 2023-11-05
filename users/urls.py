@@ -5,8 +5,7 @@ from rest_framework_simplejwt.views import (TokenObtainPairView,
 from . import views
 
 urlpatterns = [
-     path('forgot-password/',include('forgot_password.urls')),
-
+    
     path("create_user",views.CreateUserView.as_view()),
     path("get_userdata",views.user_info),
     path("profiles/",views.UserProfileApiView.as_view()),

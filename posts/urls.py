@@ -6,7 +6,6 @@ from . import views
 
 urlpatterns = [
     path('', views.index),
-    path('redirect',views.redirect_page),
     path('posts/', views.PostsApiView.as_view()),
     path('post/<slug:slug>', views.PostDetailApiView.as_view(),name="post_detail"),
     path('posts/category/<str:category>',views.GetPostBycategory.as_view()),
@@ -17,6 +16,10 @@ urlpatterns = [
     path('comment/<slug:slug>',views.CreateComment.as_view()),
     path('comment/',views.CreateComment.as_view()),
     path('featured-category',views.get_featured_category),
+    
+    
+    # * GET USER ACTION likes,dislikes
+    path('post/<slug:slug>/action/<str:action>',views.PostUserAction.as_view()),
 ]
 
 

@@ -1,15 +1,16 @@
 from django.conf import settings
-from django.shortcuts import render
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.db.models import Q
 from django.http import Http404
+from django.shortcuts import render
 from rest_framework import generics, pagination, status
 from rest_framework.authentication import (SessionAuthentication,
                                            TokenAuthentication)
 from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from .mixins import StaffEditOnly, UserEditOnly
 from .models import Categories, Comments, Post, ViewPost
@@ -26,8 +27,7 @@ def index(request):
     return Response(data.data)
 
 
-def redirect_page(request):
-    return render(request,'index.html',{})
+
 class PostsApiView(generics.ListAPIView):
     serializer_class = PostListSerializers
     queryset = Post.objects.all()
@@ -187,3 +187,40 @@ class LatestPosts(generics.ListAPIView):
 def get_featured_category(request):
     category = Categories.objects.filter(category__icontains="romance").first()
     return Response(category.category)
+
+
+
+class PostUserAction(APIView):
+    queryset = Post.objects.all()
+    
+    def get_object(self):
+        qs = self.queryset
+        return qs.get(slug = self.kwargs.get('slug'))
+        
+    
+    def get(self,*args, **kwargs):
+        actions = ['like','dislike']
+        user_action = kwargs.get('action')
+        
+        
+        # check if action is valid
+        if user_action in actions:
+            user:User = self.request.user
+            # check if user has liked post before
+            if user_action == 'like':
+                if self.get_object().likes.filter(id = user.id).exists():
+                    return Response({'data':"user already likes post"},status=200)
+                else:
+                    if self.get_object().dislikes.filter(id = user.id).exists():
+                        self.get_object().dislikes.remove(user)
+                    self.get_object().likes.add(user)
+                    return Response({'data':"post liked successfully"},status=200)
+            else:
+                if self.get_object().dislikes.filter(id = user.id).exists():
+                    return Response({'data':"user already dislikes post"},status=200)
+                else:
+                    if self.get_object().likes.filter(id = user.id).exists():
+                        self.get_object().likes.remove(user)
+                    self.get_object().dislikes.add(user)
+                    return Response({'data':"post disliked successfully"},status=200)
+        return Response(status=404)

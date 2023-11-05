@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'posts',
+    'notifications_and_messages',
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
@@ -127,8 +128,9 @@ config(
   api_proxy = "http://proxy.server:3128"
 )
 
-import cloudinary.uploader
 import cloudinary.api
+import cloudinary.uploader
+
 # * FOR MEDIA
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")

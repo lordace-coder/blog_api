@@ -69,7 +69,9 @@ class PostDetailSerializer(serializers.ModelSerializer):
     date = serializers.SerializerMethodField()
     comment_count = serializers.SerializerMethodField(read_only = True)
     post_detail_url = serializers.HyperlinkedIdentityField(view_name='post_detail',lookup_field='slug')
- 
+    likes_count = serializers.SerializerMethodField()
+    dislikes_count = serializers.SerializerMethodField()
+    
     class Meta:
         model = Post
         fields = [
@@ -83,10 +85,19 @@ class PostDetailSerializer(serializers.ModelSerializer):
             'comment_count',
             'comment',
             'author',
+            'likes_count',
+            'dislikes_count',
             'post_detail_url',
             'slug'
         ]
-
+    def get_likes_count(self,obj):
+        return obj.likes.count()
+    
+    
+    def get_dislikes_count(self,obj):
+        return obj.dislikes.count()
+    
+    
     def get_image(self,obj):
         image = None
         if obj.image:
