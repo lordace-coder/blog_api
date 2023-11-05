@@ -12,6 +12,5 @@ class NotificationApiView(generics.ListAPIView):
   
     def get_queryset(self):
         qs = super().get_queryset()
-        username = self.kwargs.get('username')
-        user = User.objects.get(username = username)
-        return qs.filter(user = user)
+        user = self.request.user
+        return qs.filter(user = user).order_by('-created_at').order_by('read')

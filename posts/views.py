@@ -190,7 +190,25 @@ def get_featured_category(request):
 
 
 
-class PostUserAction(APIView):
+@api_view(['POST'])
+def contact_user(request):
+    data = request.POST
+    
+    try:
+        send_mail(
+            subject=data.get('subject'),
+            message=data.get('message'),
+            fail_silently=False,
+            from_email=settings.EMAIL_HOST_USER,
+            to=[settings.EMAIL_HOST_USER]
+        )
+        return Response(status=200)
+    except Exception as e:
+        return Response(e,status=500)
+
+
+
+class PostUserAction(UserEditOnly,APIView):
     queryset = Post.objects.all()
     
     def get_object(self):
@@ -201,26 +219,16 @@ class PostUserAction(APIView):
     def get(self,*args, **kwargs):
         actions = ['like','dislike']
         user_action = kwargs.get('action')
-        
-        
+             
         # check if action is valid
         if user_action in actions:
+            obj = self.get_object()
             user:User = self.request.user
             # check if user has liked post before
             if user_action == 'like':
-                if self.get_object().likes.filter(id = user.id).exists():
-                    return Response({'data':"user already likes post"},status=200)
-                else:
-                    if self.get_object().dislikes.filter(id = user.id).exists():
-                        self.get_object().dislikes.remove(user)
-                    self.get_object().likes.add(user)
-                    return Response({'data':"post liked successfully"},status=200)
+                obj.like_post(user)
+                return Response({'data':"post liked"},status = 200)
             else:
-                if self.get_object().dislikes.filter(id = user.id).exists():
-                    return Response({'data':"user already dislikes post"},status=200)
-                else:
-                    if self.get_object().likes.filter(id = user.id).exists():
-                        self.get_object().likes.remove(user)
-                    self.get_object().dislikes.add(user)
-                    return Response({'data':"post disliked successfully"},status=200)
+                obj.dislike_post(user)
+                return Response({'data':"post disliked"},status = 200)
         return Response(status=404)

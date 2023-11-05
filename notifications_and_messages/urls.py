@@ -3,5 +3,5 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('<str:username>',views.NotificationApiView.as_view())
+    path('',views.NotificationApiView.as_view()),
 ]

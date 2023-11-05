@@ -9,10 +9,11 @@ from django.urls import reverse
 from django.utils.text import slugify
 
 from helpers.format_date import format_time_ago
+from notifications_and_messages.models import Notifications
 
 # Create your models here.
 
-user = get_user_model()
+User = get_user_model()
 
 
 class Carousel(models.Model):
@@ -31,7 +32,7 @@ class Categories(models.Model):
 
 class Comments(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
-    author = models.ForeignKey(user, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
     comment = models.CharField(max_length=200)
 
     @property
@@ -48,16 +49,16 @@ class Post(models.Model):
     slug = models.SlugField(max_length=100,null=True,blank=True)
     image = CloudinaryField(blank = True,null = True)
     date_created = models.DateTimeField(auto_now_add=True)
-    likes = models.ManyToManyField(user,related_name="likes",blank=True)
-    dislikes = models.ManyToManyField(user,related_name="dislikes",blank=True)
+    likes = models.ManyToManyField(User,related_name="likes",blank=True)
+    dislikes = models.ManyToManyField(User,related_name="dislikes",blank=True)
     category = models.ManyToManyField(
         Categories, related_name='categories', blank=True, )
 
     views = models.IntegerField(default=0)
     comment = models.ManyToManyField(
         Comments, related_name='user_comments', blank=True)
-    author = models.ForeignKey(user,on_delete=models.CASCADE)
-    def view_post(self, user: user):
+    author = models.ForeignKey(User,on_delete=models.CASCADE)
+    def view_post(self, user: User):
         qs = ViewPost.objects.filter(post=self, user=user)
         if not qs.exists():
             self.mark_seen()
@@ -89,9 +90,31 @@ class Post(models.Model):
         return super().delete(*args, **kwargs)
 
 
+# * LIKE USER POST
+    def like_post(self,user:User):
+        if self.likes.filter(id = user.id).exists():
+            return
+        else:
+            if self.dislikes.filter(id = user.id).exists():
+                self.dislikes.remove(user)
+            notification = Notifications.objects.create(user = self.author,notification = f"{self.author.username} liked your post {self.title}")
+            notification.save()
+            self.likes.add(user)
+
+#  *DISLIKE USER POST
+    def dislike_post(self,user:User):
+        if self.dislikes.filter(id = user.id).exists():
+            return
+        else:
+            if self.likes.filter(id = user.id).exists():
+                self.likes.remove(user)
+            notification = Notifications.objects.create(user = self.author,notification = f"{self.author.username} liked your post {self.title}")
+            notification.save()
+            self.dislikes.add(user)
+
 class ViewPost(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
-    user = models.ForeignKey(user, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     @staticmethod
     def seen(post,user)->bool:
