@@ -124,7 +124,7 @@ class CarouselSerializer(serializers.ModelSerializer):
     class Meta:
         model = Carousel
         fields = (
-            "image"
+            "image",
             )
 
     def get_image(self,obj):
