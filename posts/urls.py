@@ -6,6 +6,7 @@ from . import views
 
 urlpatterns = [
     path('', views.index),
+    path('download-app',views.download_app),
     path('contact-staff', views.contact_user),
     path('slider', views.carousels),
     path('posts/', views.PostsApiView.as_view()),

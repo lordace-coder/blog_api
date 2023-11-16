@@ -1,8 +1,10 @@
+import os
+
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.db.models import Q
-from django.http import Http404
+from django.http import FileResponse, Http404
 from django.shortcuts import render
 from rest_framework import generics, pagination, status
 from rest_framework.authentication import (SessionAuthentication,
@@ -13,11 +15,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .mixins import StaffEditOnly, UserEditOnly
-from .models import Categories, Comments, Post, ViewPost,Carousel
+from .models import Carousel, Categories, Comments, Post, ViewPost
 from .pagination import StandardResultsSetPagination
-from .serializers import (CategorySerializer, CommentSerializer,CarouselSerializer,
-                          PostCreateSerializer, PostDetailSerializer,
-                          PostListSerializers)
+from .serializers import (CarouselSerializer, CategorySerializer,
+                          CommentSerializer, PostCreateSerializer,
+                          PostDetailSerializer, PostListSerializers)
 
 
 @api_view(['GET'])
@@ -236,3 +238,12 @@ class PostUserAction(UserEditOnly,APIView):
                 obj.dislike_post(user)
                 return Response({'data':"post disliked"},status = 200)
         return Response(status=404)
+
+# * VIEW FOR APP DOWNLOAD
+@api_view(['GET'])
+def download_app(request):
+    
+    apk_file_path = 'files/blorger.apk'  # Replace with the actual path to your APK file
+    apk_file = open(apk_file_path, 'rb')
+
+    return FileResponse(apk_file, as_attachment=True)
