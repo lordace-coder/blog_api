@@ -242,8 +242,9 @@ class PostUserAction(UserEditOnly,APIView):
 # * VIEW FOR APP DOWNLOAD
 @api_view(['GET'])
 def download_app(request):
-    
+
     apk_file_path = 'files/blorger.apk'  # Replace with the actual path to your APK file
     apk_file = open(apk_file_path, 'rb')
-
+    # apk_file = open('w.txt','w')
+    # apk_file.write('dang')
     return FileResponse(apk_file, as_attachment=True)
