@@ -12,5 +12,10 @@ class NotificationApiView(generics.ListAPIView):
   
     def get_queryset(self):
         qs = super().get_queryset()
+        # * mark all notifications as read
+        if self.request.GET.get('read'):
+            for notification in qs:
+                notification.mark_as_read()
+            
         user = self.request.user
-        return qs.filter(user = user).order_by('-created_at').order_by('read')
+        return qs.filter(user = user).order_by('-read').order_by('-created_at')

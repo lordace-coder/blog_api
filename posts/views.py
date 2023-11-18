@@ -14,7 +14,7 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .mixins import StaffEditOnly, UserEditOnly
+from .mixins import UserEditOnly
 from .models import Carousel, Categories, Comments, Post, ViewPost
 from .pagination import StandardResultsSetPagination
 from .serializers import (CarouselSerializer, CategorySerializer,
@@ -47,12 +47,14 @@ class PostsApiView(generics.ListAPIView):
         return super().get_queryset().order_by('?')
 
 
-class CreatePostView( StaffEditOnly,generics.CreateAPIView):
+class CreatePostView( UserEditOnly,generics.CreateAPIView):
     serializer_class = PostCreateSerializer
     queryset = Post.objects.all()
 
     def get(self,*args,**kwargs):
         return Response(f"{self.permission_classes}")
+    
+    
     def post(self, request, *args, **kwargs):
         category = request.data.get('category')
         user = request.user
@@ -104,11 +106,13 @@ class PostDetailApiView(generics.RetrieveAPIView):
 
 
 
-class EditDeletePostView(StaffEditOnly,generics.RetrieveUpdateDestroyAPIView):
+class EditDeletePostView(UserEditOnly,generics.RetrieveUpdateDestroyAPIView):
     queryset = Post.objects.all()
     serializer_class = PostCreateSerializer
     lookup_field = 'slug'
 
+    
+    #todo user can only edit and delete post if he is a staff or the owner of the post
     def get_object(self):
         queryset = self.get_queryset()
         obj = queryset.get(slug=self.kwargs['slug'])

@@ -15,6 +15,9 @@ class Notifications(models.Model):
     def formated_time(self):
         return format_time_ago(self.created_at)
 
+    def mark_as_read(self):
+        self.read = True
+        self.save()
 
 class Messages(models.Model):
     author = models.ForeignKey(User,on_delete=models.CASCADE,related_name='sender')

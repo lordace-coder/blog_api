@@ -7,5 +7,4 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token = super().get_token(user)
         token['is_staff'] = user.is_staff
         # Add more custom claims or information as needed
-        print(token)
         return token

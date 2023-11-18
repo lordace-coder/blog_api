@@ -23,8 +23,3 @@ class UserProfile(models.Model):
             return None
         return qs
 
-    def save(self, *args, **kwargs) -> None:
-        if not self.user.is_staff:
-            self.user.is_staff = True
-            self.user.save()
-        return super().save(*args, **kwargs)

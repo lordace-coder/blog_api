@@ -6,7 +6,7 @@ endpoint = "http://localhost:8000/auth/get_token/"
 def get_token():
     data = {
     'username':"lordace",
-    'password':"lordace",
+    'password':"lordacemax",
     
 }
     response = requests.post(endpoint,json=data)

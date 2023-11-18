@@ -28,24 +28,30 @@ def user_info(request):
 
 
 
-class UserProfileApiView(StaffEditOnly,RetrieveUpdateAPIView):
+class UserProfileApiView(RetrieveUpdateAPIView):
     serializer_class = UserProfileSerializer
     queryset = UserProfile.objects.all()
 
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
-
-        if not request.user.is_staff:
-            return Response(status=401,data={"error":"for staff users only"})
         if request.user == obj.user or request.user.is_superuser:
            return super().get(request, *args, **kwargs)
         return Response(status=400,data={"error":"permission denied"})
+
+    def patch(self, request, *args, **kwargs):
+        # * manually update email
+        email = request.data.get('email')
+        if email:
+            user = request.user
+            user.email = email
+            user.save()
+        return super().patch(request, *args, **kwargs)
+
 
     def get_object(self):
         queryset = self.get_queryset()
         user =self.request.user
         obj,created = queryset.get_or_create(user = user)
-
         return obj
 
 
@@ -57,7 +63,7 @@ class UserProfileVisitorsView(RetrieveAPIView):
         author = self.kwargs.get("author")
         qs = self.get_queryset()
         user = User.objects.get(username = author)
-        profile = qs.get(user = user)
+        profile,_ = qs.get_or_create(user = user)
         return profile
 
 
