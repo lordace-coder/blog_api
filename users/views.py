@@ -78,7 +78,7 @@ class UserSearchView(APIView):
 
         users = User.objects.filter(
             Q(username__icontains=username) | Q(email__icontains=username)
-        ).filter(is_staff = True)
+        )
 
         serializer = self.serializer_class(users, many=True)
 

@@ -14,6 +14,8 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from notifications_and_messages.models import Notifications
+
 from .mixins import UserEditOnly
 from .models import Carousel, Categories, Comments, Post, ViewPost
 from .pagination import StandardResultsSetPagination
@@ -91,7 +93,7 @@ class PostDetailApiView(generics.RetrieveAPIView):
 
 
 
-    #  todo: work on this
+  
     def get_object(self):
         queryset = self.get_queryset()
         obj = queryset.get(slug=self.kwargs['slug'])
@@ -101,6 +103,13 @@ class PostDetailApiView(generics.RetrieveAPIView):
         if user.is_authenticated and not ViewPost.seen(post = obj,user=user):
             obj.view_post(user=user)
         return obj
+    
+    def retrieve(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        obj = queryset.get(slug=self.kwargs['slug'])
+        is_permitted = (obj.author == self.request.user) or self.request.user.is_staff
+        serializer = self.get_serializer( self.get_object(),context = {'can-update':is_permitted,'request':request})
+        return Response(serializer.data,status = 200)
 
 
 
@@ -112,7 +121,7 @@ class EditDeletePostView(UserEditOnly,generics.RetrieveUpdateDestroyAPIView):
     lookup_field = 'slug'
 
     
-    #todo user can only edit and delete post if he is a staff or the owner of the post
+
     def get_object(self):
         queryset = self.get_queryset()
         obj = queryset.get(slug=self.kwargs['slug'])
@@ -167,10 +176,11 @@ class CreateComment(UserEditOnly,generics.ListCreateAPIView):
         serializer = self.get_serializer(data=data)
 
         serializer.is_valid(raise_exception=True)
+
         comment = serializer.save(author=request.user)
         post.comment.add(comment)
         post.save()
-
+        Notifications.objects.create(notification=f"{comment.author} commented on your story {post.title}",user=post.author)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class GetPostBycategory(generics.ListAPIView):
@@ -200,22 +210,24 @@ def get_featured_category(request):
 
 
 
-@api_view(['POST'])
-def contact_user(request):
-    data = request.POST
 
-    try:
-        send_mail(
-            subject=data.get('subject'),
-            message=data.get('message'),
-            fail_silently=False,
-            from_email=settings.EMAIL_HOST_USER,
-            to=[settings.EMAIL_HOST_USER]
-        )
-        return Response(status=200)
-    except Exception as e:
-        return Response(e,status=500)
 
+class ContactUser(APIView):
+    def post(self,request,*args, **kwargs):
+        data = request.data
+        print(data)
+        try:
+            send_mail(
+                subject=data.get('subject'),
+                message=data.get('message'),
+                fail_silently=False,
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[settings.EMAIL_HOST_USER]
+            )
+            return Response(status=200)
+        except Exception as e:
+            return Response(str(e),status=500)
+contact_user = ContactUser.as_view()
 
 
 class PostUserAction(UserEditOnly,APIView):

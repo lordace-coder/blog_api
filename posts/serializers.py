@@ -71,12 +71,13 @@ class PostDetailSerializer(serializers.ModelSerializer):
     post_detail_url = serializers.HyperlinkedIdentityField(view_name='post_detail',lookup_field='slug')
     likes_count = serializers.SerializerMethodField()
     dislikes_count = serializers.SerializerMethodField()
-
+    can_update = serializers.SerializerMethodField()
+    
     class Meta:
         model = Post
         fields = [
             "title",
-
+            'can_update',
             "views",
             "category",
             "image",
@@ -93,7 +94,9 @@ class PostDetailSerializer(serializers.ModelSerializer):
     def get_likes_count(self,obj):
         return obj.likes.count()
 
-
+    def get_can_update(self,obj):
+        return self.context.get('can-update')
+    
     def get_dislikes_count(self,obj):
         return obj.dislikes.count()
 

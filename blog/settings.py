@@ -175,7 +175,8 @@ FORGOT_PASSWORD_CONFIG = {
     """
 }
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'bloggernetlify@gmail.com'
 EMAIL_HOST_PASSWORD = 'ziihipjirjkojfvg'

@@ -15,15 +15,8 @@ def handle_author_notifications(sender,instance:Post,created,*args, **kwargs):
         notification = Notifications.objects.create(notification=f"Post {instance.title} created successfully, go view post",user=instance.author)
         notification.save()
     else:
-        print(args,kwargs)
         Notifications.objects.create(notification=f"Post {instance.title} has been recently updated",user=instance.author)
 
-
-@receiver(post_save,sender=Comments)
-def notify_author_for_comment(sender,instance:Comments,created,*args, **kwargs):
-    if created:
-        post = instance.post
-        notification = Notifications.objects.create(notification=f"{instance.author} commented on your story {post.title}",user=post.author)
 
 
 @receiver(post_delete,sender = Comments)
@@ -33,4 +26,4 @@ def notify_user_comment_deleted(sender,instance:Comments,*args, **kwargs):
 
 @receiver(post_delete,sender = Post)
 def notify_user_comment_deleted(sender,instance:Post,*args, **kwargs):
-    Notifications.objects.create(notification=f"your story was deleted by our staff for violating our policies, contact us if there was a problem",user=instance.author)
+    Notifications.objects.create(notification=f"your story was deleted , contact us if there was a problem",user=instance.author)

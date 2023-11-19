@@ -23,7 +23,7 @@ class Token(models.Model):
     expiry = models.DateTimeField(blank = True,null = True)
     created_at = models.DateTimeField(auto_created=True,auto_now=True)
 
-    # todo clear all expired tokens with this method
+
     @staticmethod
     def clear_expired_tokens():
         try:
