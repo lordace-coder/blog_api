@@ -15,6 +15,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from notifications_and_messages.models import Notifications
+from users.models import UserProfile
 
 from .mixins import UserEditOnly
 from .models import Carousel, Categories, Comments, Post, ViewPost
@@ -56,6 +57,10 @@ class CreatePostView( UserEditOnly,generics.CreateAPIView):
     def get(self,*args,**kwargs):
         return Response(f"{self.permission_classes}")
     
+    def get_profile(self,request):
+        query,_ = UserProfile.objects.get_or_create(user = request.user)
+        return query
+    
     
     def post(self, request, *args, **kwargs):
         category = request.data.get('category')
@@ -79,7 +84,17 @@ class CreatePostView( UserEditOnly,generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
 
         serializer.save(author = user)
-
+        # * send a notification to your followers that you created a new post
+        try:
+            qs:UserProfile = self.get_profile(request)
+            followers =  qs.stars.all()
+            for user in followers:
+                # *send notification to each user
+                Notifications.objects.create(notification = f"{request.user} posted a story ... check it out",user = user)
+            
+        except Exception as e:
+            print(f"error occured {e}")
+            
         return Response({'success':"post uploaded succesfully"})
 
 
@@ -89,9 +104,6 @@ class PostDetailApiView(generics.RetrieveAPIView):
     queryset = Post.objects.all()
     serializer_class = PostDetailSerializer
     lookup_field = 'slug'
-
-
-
 
   
     def get_object(self):

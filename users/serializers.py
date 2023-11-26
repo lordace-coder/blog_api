@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Group, User
 from rest_framework import serializers
 
 from posts.serializers import UserProfilePostListSerializers
@@ -40,6 +40,7 @@ class UserSerializer(serializers.ModelSerializer):
 
         return image
 
+
 class UserProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source = 'user.username',read_only=True)
     email = serializers.CharField(source = 'user.email',read_only=True)
@@ -47,6 +48,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
     post_count = serializers.SerializerMethodField()
     perc_posts = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
+    is_verified = serializers.SerializerMethodField()
+    following = serializers.SerializerMethodField()
+    
     class Meta:
         model = UserProfile
         fields = (
@@ -59,6 +63,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "email",
             "post_count",
             "perc_posts",
+            'star_count',
+            'is_verified',
+            'following',
         )
     def get_image(self,obj):
         image = None
@@ -89,3 +96,16 @@ class UserProfileSerializer(serializers.ModelSerializer):
         if posts:
             q = posts[0:10]
         return  UserProfilePostListSerializers(q,many=True).data
+
+
+    def get_is_verified(self,obj):
+        user = obj.user
+        verified_group_instance = Group.objects.get(name = 'verified')
+        if user.is_authenticated:
+            return user.is_staff or user.groups.contains(verified_group_instance)
+    
+    def get_following(self,obj:UserProfile):
+        requesting_user = self.context.get('request').user
+        if requesting_user.is_authenticated:
+            return obj.stars.contains(requesting_user)
+        return False

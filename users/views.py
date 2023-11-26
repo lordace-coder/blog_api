@@ -4,9 +4,11 @@ from rest_framework import serializers
 from rest_framework.decorators import api_view
 from rest_framework.generics import (CreateAPIView, RetrieveAPIView,
                                      RetrieveUpdateAPIView)
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from notifications_and_messages.models import Notifications
 from posts.mixins import StaffEditOnly
 from users.models import UserProfile
 
@@ -83,3 +85,36 @@ class UserSearchView(APIView):
         serializer = self.serializer_class(users, many=True)
 
         return Response(serializer.data)
+
+
+
+class FollowUserProfile(APIView):
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get(self,request,*args,**kwargs):
+        requesting_user = request.user
+        try:
+            user = User.objects.get(username = self.kwargs.get('author'))
+            user_profile = UserProfile.objects.get(user = user)
+            if user_profile.stars.contains(requesting_user):
+                user_profile.stars.remove(requesting_user)
+                user_profile.save()
+                Notifications.objects.create(
+                    notification = f"{requesting_user} just unfollowed you.",
+                    user=user,
+                    
+                )
+                return Response('unfollowed succesfully')
+            else:
+                user_profile.stars.add(requesting_user)
+                user_profile.save()
+                Notifications.objects.create(
+                    notification = f"{requesting_user} started following you",
+                    user=user,
+                    
+                )
+
+                return Response('followed succesfully')
+        except Exception as e:
+            return Response(f"error occured {e}",status=404)

@@ -14,7 +14,7 @@ class UserProfile(models.Model):
     mobile = models.CharField(max_length=20,null = True,blank=True)
     image = CloudinaryField(blank = True,null = True)
     full_name = models.CharField(max_length = 200,null = True,blank = True)
-
+    stars = models.ManyToManyField(User,related_name='following',blank=True)
 
 
     def get_posts_by_user(self):
@@ -23,3 +23,6 @@ class UserProfile(models.Model):
             return None
         return qs
 
+    @property
+    def star_count(self)->int:
+        return self.stars.count()

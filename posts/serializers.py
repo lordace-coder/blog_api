@@ -12,19 +12,26 @@ class CommentSerializer(serializers.ModelSerializer):
         exclude = ('date_created','id')
 
     def get_date(self, obj):
-
         return obj.get_formated_date
 
 
 
 class PostListSerializers(serializers.ModelSerializer):
+    # * initialize extra fields and args
     intro = serializers.SerializerMethodField()
     date = serializers.SerializerMethodField()
     author = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
     category = serializers.SerializerMethodField()
     post_detail_url = serializers.HyperlinkedIdentityField(view_name='post_detail',lookup_field='slug')
-
+    likes_count = serializers.SerializerMethodField()
+    dislikes_count = serializers.SerializerMethodField()
+    liked = serializers.SerializerMethodField()
+    disliked = serializers.SerializerMethodField()
+    can_update = serializers.SerializerMethodField()
+    comment_count = serializers.SerializerMethodField()
+    
+    
     class Meta:
         model = Post
         fields = [
@@ -36,7 +43,13 @@ class PostListSerializers(serializers.ModelSerializer):
             "author",
             "post_detail_url",
             'date',
-            'slug'
+            'slug',
+            'likes_count',
+            'dislikes_count',
+            'can_update',
+             'comment_count',
+            'liked',
+            'disliked',
         ]
 
     def get_image(self,obj):
@@ -57,8 +70,39 @@ class PostListSerializers(serializers.ModelSerializer):
     def get_category(self,obj:Post):
         qs = obj.category.first()
         return f"{qs}"
+    
     def get_author(self,obj):
         return obj.author.username
+    
+    def get_likes_count(self,obj):
+        return obj.likes.count()
+
+    def get_can_update(self,obj):
+        user = self.context.get('request').user
+        if user.is_authenticated:
+            return user == obj.author or user.is_staff or user.is_admin
+        return False
+
+    def get_dislikes_count(self,obj):
+        return obj.dislikes.count()
+
+    def get_liked(self,obj:Post):
+        
+        user = self.context.get('request').user
+        if user.is_authenticated:
+            if obj.likes.contains(user):
+                return True
+        return False
+
+    def get_comment_count(self,obj):
+        return obj.comment.count()
+    
+    def get_disliked(self,obj:Post):
+        user = self.context.get('request').user
+        if user.is_authenticated:
+            if obj.dislikes.contains(user):
+                return True
+        return False
 
 
 class PostDetailSerializer(serializers.ModelSerializer):

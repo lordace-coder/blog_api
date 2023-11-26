@@ -105,7 +105,7 @@ class Post(models.Model):
         else:
             if self.likes.filter(id = user.id).exists():
                 self.likes.remove(user)
-            notification = Notifications.objects.create(user = self.author,notification = f"{self.author.username} liked your post {self.title}")
+            notification = Notifications.objects.create(user = self.author,notification = f"{self.author.username} disliked your post {self.title}")
             notification.save()
             self.dislikes.add(user)
 
