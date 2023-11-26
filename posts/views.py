@@ -14,7 +14,7 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from notifications_and_messages.models import Notifications
+from notifications_and_messages.models import FlagedUsers, Notifications
 from users.models import UserProfile
 
 from .mixins import UserEditOnly
@@ -65,6 +65,9 @@ class CreatePostView( UserEditOnly,generics.CreateAPIView):
     def post(self, request, *args, **kwargs):
         category = request.data.get('category')
         user = request.user
+        if FlagedUsers.is_flagged(user) and FlagedUsers.objects.get(user=user).is_active:
+            
+            return Response(status=400,data='user doesnt have posting priviledges')
         # for rest framework view
         if not category:
             category = request.data.get('category.category')

@@ -7,3 +7,5 @@ from .models import *
 
 admin.site.register(Notifications)
 admin.site.register(Messages)
+admin.site.register(FlagedUsers)
+admin.site.register(Reports)
