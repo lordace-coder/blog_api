@@ -19,7 +19,7 @@ urlpatterns = [
     path('comment/<slug:slug>',views.CreateComment.as_view()),
     path('comment/',views.CreateComment.as_view()),
     path('featured-category',views.get_featured_category),
-
+    path('report-user',views.ReportUser.as_view()),
 
     # * GET USER ACTION likes,dislikes
     path('post/<slug:slug>/action/<str:action>',views.PostUserAction.as_view()),

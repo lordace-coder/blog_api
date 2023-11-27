@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'users',
     'cloudinary',
     'forgot_password',
-
+    'staffpanel',
 ]
 
 MIDDLEWARE = [

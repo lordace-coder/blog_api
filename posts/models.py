@@ -58,6 +58,13 @@ class Post(models.Model):
     comment = models.ManyToManyField(
         Comments, related_name='user_comments', blank=True)
     author = models.ForeignKey(User,on_delete=models.CASCADE)
+    verified = models.BooleanField(default=False)
+    
+    
+    def verify(self):
+        self.verified = True
+        self.save()
+        
     def view_post(self, user: User):
         qs = ViewPost.objects.filter(post=self, user=user)
         if not qs.exists():

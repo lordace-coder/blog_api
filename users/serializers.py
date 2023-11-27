@@ -13,6 +13,7 @@ class UserSerializer(serializers.ModelSerializer):
     email = serializers.CharField(validators=[validate_email])
     is_staff =serializers.SerializerMethodField(read_only = True)
     is_admin =serializers.SerializerMethodField(read_only = True)
+    
     class Meta:
         model = User
         fields = ['username','email','password','is_staff',"is_admin","image"]
@@ -26,6 +27,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_is_staff(self,obj:User):
         return obj.is_staff
+
 
     def get_is_admin(self,obj):
         return obj.is_superuser
@@ -50,6 +52,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
     is_verified = serializers.SerializerMethodField()
     following = serializers.SerializerMethodField()
+    likes = serializers.SerializerMethodField()
     
     class Meta:
         model = UserProfile
@@ -66,7 +69,13 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'star_count',
             'is_verified',
             'following',
+            'likes',
         )
+        
+        
+    def get_likes(self,obj):
+        return obj.get_likes_count
+    
     def get_image(self,obj):
         image = None
         if obj.image:

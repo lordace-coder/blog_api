@@ -1,5 +1,7 @@
 from rest_framework import serializers
 
+from notifications_and_messages.models import Reports
+
 from .models import Carousel, Categories, Comments, Post
 from .validators import validate_title
 
@@ -252,3 +254,9 @@ class UserProfilePostListSerializers(serializers.ModelSerializer):
         return f"{qs}"
 
 
+
+
+class ReportSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Reports
+        fields = "__all__"

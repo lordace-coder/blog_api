@@ -9,12 +9,13 @@ MethodField = serializers.SerializerMethodField
 
 
 class NotificationSerializer(ModelSerializer):
-    user = serializers.CharField(source='user.username')
+    username = serializers.CharField(source='user.username',read_only=True)
     class Meta:
         model = Notifications
         fields = (
             'notification',
             'user',
+            'username',
             'read',
             'formated_time'
         )

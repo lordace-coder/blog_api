@@ -14,7 +14,8 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from notifications_and_messages.models import FlagedUsers, Notifications
+from notifications_and_messages.models import (FlagedUsers, Notifications,
+                                               Reports)
 from users.models import UserProfile
 
 from .mixins import UserEditOnly
@@ -22,7 +23,8 @@ from .models import Carousel, Categories, Comments, Post, ViewPost
 from .pagination import StandardResultsSetPagination
 from .serializers import (CarouselSerializer, CategorySerializer,
                           CommentSerializer, PostCreateSerializer,
-                          PostDetailSerializer, PostListSerializers)
+                          PostDetailSerializer, PostListSerializers,
+                          ReportSerializer)
 
 
 @api_view(['GET'])
@@ -270,6 +272,23 @@ class PostUserAction(UserEditOnly,APIView):
                 return Response({'data':"post disliked"},status = 200)
         return Response(status=404)
 
+
+# todo add to urls
+class ReportUser(APIView):
+    def get(self,request,*args, **kwargs):
+        try:
+            msg = request.GET.get('report')
+            reported_user = User.objects.get(username = request.GET.get('reported_user'))
+            user = request.user
+            # * new report 
+            Reports.objects.create(reported_user = reported_user,reporting_user = user,report = msg)
+            return Response({'data':'succesfull upload'},status=200)
+            
+        except:
+            return Response('report failed,maybe user is invalid',status=400)
+        
+
+
 # * VIEW FOR APP DOWNLOAD
 @api_view(['GET'])
 def download_app(request):
@@ -279,3 +298,11 @@ def download_app(request):
     # apk_file = open('w.txt','w')
     # apk_file.write('dang')
     return FileResponse(apk_file, as_attachment=True)
+
+
+
+
+# *REPORT A USER
+class ReportUser(generics.CreateAPIView):
+    serializer_class = ReportSerializer
+    

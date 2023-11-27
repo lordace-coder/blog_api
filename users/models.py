@@ -22,6 +22,14 @@ class UserProfile(models.Model):
         if not qs.exists():
             return None
         return qs
+    
+    @property
+    def get_likes_count(self):
+        posts = self.get_posts_by_user()
+        count = 0
+        for i in posts:
+            count+= i.likes.count()
+        return count
 
     @property
     def star_count(self)->int:
