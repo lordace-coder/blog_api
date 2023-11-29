@@ -27,8 +27,9 @@ class UserProfile(models.Model):
     def get_likes_count(self):
         posts = self.get_posts_by_user()
         count = 0
-        for i in posts:
-            count+= i.likes.count()
+        if posts is not None:
+            for i in posts:
+                count+= i.likes.count()
         return count
 
     @property

@@ -1,6 +1,5 @@
-from rest_framework import serializers
-
 from notifications_and_messages.models import Reports
+from rest_framework import serializers
 
 from .models import Carousel, Categories, Comments, Post
 from .validators import validate_title
@@ -82,7 +81,7 @@ class PostListSerializers(serializers.ModelSerializer):
     def get_can_update(self,obj):
         user = self.context.get('request').user
         if user.is_authenticated:
-            return user == obj.author or user.is_staff or user.is_admin
+            return user == obj.author or user.is_staff or user.is_superuser
         return False
 
     def get_dislikes_count(self,obj):
@@ -118,6 +117,8 @@ class PostDetailSerializer(serializers.ModelSerializer):
     likes_count = serializers.SerializerMethodField()
     dislikes_count = serializers.SerializerMethodField()
     can_update = serializers.SerializerMethodField()
+    disliked = serializers.SerializerMethodField()
+    liked = serializers.SerializerMethodField()
     
     class Meta:
         model = Post
@@ -134,6 +135,8 @@ class PostDetailSerializer(serializers.ModelSerializer):
             'author',
             'likes_count',
             'dislikes_count',
+            'disliked',
+            'liked',
             'post_detail_url',
             'slug'
         ]
@@ -145,8 +148,21 @@ class PostDetailSerializer(serializers.ModelSerializer):
     
     def get_dislikes_count(self,obj):
         return obj.dislikes.count()
-
-
+    
+    def get_disliked(self,obj:Post):
+        user = self.context.get('request').user
+        if user.is_authenticated:
+            if obj.dislikes.contains(user):
+                return True
+        return False
+    
+    def get_liked(self,obj:Post):
+        
+        user = self.context.get('request').user
+        if user.is_authenticated:
+            if obj.likes.contains(user):
+                return True
+        return False
     def get_image(self,obj):
         image = None
         if obj.image:

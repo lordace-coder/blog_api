@@ -2,8 +2,8 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from rest_framework import serializers
 from rest_framework.decorators import api_view
-from rest_framework.generics import (CreateAPIView, RetrieveAPIView,
-                                     RetrieveUpdateAPIView)
+from rest_framework.generics import (CreateAPIView, ListAPIView,
+                                     RetrieveAPIView, RetrieveUpdateAPIView)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -12,7 +12,8 @@ from notifications_and_messages.models import Notifications
 from posts.mixins import StaffEditOnly
 from users.models import UserProfile
 
-from .serializers import UserProfileSerializer, UserSerializer
+from .serializers import (UserProfileSearchSerializer, UserProfileSerializer,
+                          UserSerializer)
 
 
 class CreateUserView(CreateAPIView):
@@ -69,22 +70,33 @@ class UserProfileVisitorsView(RetrieveAPIView):
         return profile
 
 
-class UserSearchView(APIView):
-    serializer_class = UserSerializer
+# class UserSearchView(APIView):
+#     serializer_class = UserSerializer
 
-    def get(self, request):
-        username = request.query_params.get("username")
+#     def get(self, request):
+#         username = request.query_params.get("username")
 
-        if username is None:
-            raise serializers.ValidationError("Username is required.")
+#         if username is None:
+#             raise serializers.ValidationError("Username is required.")
 
-        users = User.objects.filter(
-            Q(username__icontains=username) | Q(email__icontains=username)
-        )
+#         users = User.objects.filter(
+#             Q(username__icontains=username) | Q(email__icontains=username)
+#         )
 
-        serializer = self.serializer_class(users, many=True)
+#         serializer = self.serializer_class(users, many=True)
 
-        return Response(serializer.data)
+#         return Response(serializer.data)
+
+
+class UserSearchView(ListAPIView):
+    serializer_class = UserProfileSearchSerializer
+    queryset = UserProfile.objects.all()
+    
+    def get_queryset(self):
+        qs = super().get_queryset()
+        username = self.request.query_params.get("username")
+        return qs.filter(user__username__icontains = username)
+        
 
 
 

@@ -118,3 +118,51 @@ class UserProfileSerializer(serializers.ModelSerializer):
         if requesting_user.is_authenticated:
             return obj.stars.contains(requesting_user)
         return False
+
+
+class UserProfileSearchSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source = 'user.username',read_only=True)
+    email = serializers.CharField(source = 'user.email',read_only=True)
+    image = serializers.SerializerMethodField()
+    is_verified = serializers.SerializerMethodField()
+    following = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = UserProfile
+        fields = (
+            "username",
+            "full_name",
+            "image",
+            "mobile",
+            "address",
+            "email",
+            'star_count',
+            'is_verified',
+            'following',
+            
+        )
+        
+        
+
+    
+    def get_image(self,obj):
+        image = None
+        if obj.image:
+            image = obj.image.url
+            image = str(image).replace('http','https')
+
+        return image
+ 
+
+    def get_is_verified(self,obj):
+        user = obj.user
+        verified_group_instance = Group.objects.get(name = 'verified')
+        if user.is_authenticated:
+            return user.is_staff or user.groups.contains(verified_group_instance)
+    
+    def get_following(self,obj:UserProfile):
+        requesting_user = self.context.get('request').user
+        if requesting_user.is_authenticated:
+            return obj.stars.contains(requesting_user)
+        return False
+

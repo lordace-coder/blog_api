@@ -6,6 +6,8 @@ from django.core.mail import send_mail
 from django.db.models import Q
 from django.http import FileResponse, Http404
 from django.shortcuts import render
+from notifications_and_messages.models import (FlagedUsers, Notifications,
+                                               Reports)
 from rest_framework import generics, pagination, status
 from rest_framework.authentication import (SessionAuthentication,
                                            TokenAuthentication)
@@ -13,9 +15,6 @@ from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
-from notifications_and_messages.models import (FlagedUsers, Notifications,
-                                               Reports)
 from users.models import UserProfile
 
 from .mixins import UserEditOnly
@@ -49,7 +48,7 @@ class PostsApiView(generics.ListAPIView):
         if query and not query == ' ':
             look_up = Q(title__icontains = query)|Q(post__icontains=query)
             return super().get_queryset().filter(look_up )
-        return super().get_queryset().order_by('?')
+        return super().get_queryset().order_by('-date_created').order_by('views').order_by('verified')
 
 
 class CreatePostView( UserEditOnly,generics.CreateAPIView):

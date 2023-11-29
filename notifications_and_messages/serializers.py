@@ -19,3 +19,8 @@ class NotificationSerializer(ModelSerializer):
             'read',
             'formated_time'
         )
+
+class MessageSerializer(ModelSerializer):
+    class Meta:
+        model = Messages
+        exclude = ['id']
