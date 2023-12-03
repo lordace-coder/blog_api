@@ -1,9 +1,8 @@
 from collections.abc import Iterable
 
 from cloudinary.models import CloudinaryField
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Group, User
 from django.db import models
-
 from posts.models import Post
 
 
@@ -18,7 +17,7 @@ class UserProfile(models.Model):
 
 
     def get_posts_by_user(self):
-        qs = Post.objects.filter(author = self.user)
+        qs = Post.objects.filter(author = self.user).order_by('-date_created')
         if not qs.exists():
             return None
         return qs
@@ -35,3 +34,11 @@ class UserProfile(models.Model):
     @property
     def star_count(self)->int:
         return self.stars.count()
+    
+    @property
+    def is_verified(self):
+        user = self.user
+        verified_group_instance = Group.objects.get(name = 'verified')
+        if user.is_authenticated:
+            return user.is_staff or user.groups.contains(verified_group_instance)
+        return False

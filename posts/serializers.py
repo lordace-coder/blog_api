@@ -1,5 +1,8 @@
-from notifications_and_messages.models import Reports
 from rest_framework import serializers
+
+from notifications_and_messages.models import Reports
+from users import serializers as user_serializers
+from users.models import UserProfile
 
 from .models import Carousel, Categories, Comments, Post
 from .validators import validate_title
@@ -21,6 +24,7 @@ class PostListSerializers(serializers.ModelSerializer):
     # * initialize extra fields and args
     intro = serializers.SerializerMethodField()
     date = serializers.SerializerMethodField()
+    verified = serializers.SerializerMethodField()
     author = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
     category = serializers.SerializerMethodField()
@@ -31,7 +35,7 @@ class PostListSerializers(serializers.ModelSerializer):
     disliked = serializers.SerializerMethodField()
     can_update = serializers.SerializerMethodField()
     comment_count = serializers.SerializerMethodField()
-    
+    owns_profile = serializers.SerializerMethodField()
     
     class Meta:
         model = Post
@@ -40,6 +44,7 @@ class PostListSerializers(serializers.ModelSerializer):
             "views",
             "category",
             "image",
+            "verified",
             "intro",
             "author",
             "post_detail_url",
@@ -51,6 +56,7 @@ class PostListSerializers(serializers.ModelSerializer):
              'comment_count',
             'liked',
             'disliked',
+            'owns_profile',
         ]
 
     def get_image(self,obj):
@@ -105,11 +111,22 @@ class PostListSerializers(serializers.ModelSerializer):
                 return True
         return False
 
+    def get_owns_profile(self,obj):
+        if self.context.get('request').user.is_authenticated:
+            return self.context.get('request').user == obj.author
+        return False
+    
+    def get_verified(self,obj):
+        profile = UserProfile.objects.get(user__username=self.get_author(obj))
+        return profile.is_verified
 
+    
+    
 class PostDetailSerializer(serializers.ModelSerializer):
     comment = CommentSerializer(read_only = True,many=True)
     author = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
+    verified = serializers.SerializerMethodField()
     category = serializers.SerializerMethodField()
     date = serializers.SerializerMethodField()
     comment_count = serializers.SerializerMethodField(read_only = True)
@@ -119,18 +136,22 @@ class PostDetailSerializer(serializers.ModelSerializer):
     can_update = serializers.SerializerMethodField()
     disliked = serializers.SerializerMethodField()
     liked = serializers.SerializerMethodField()
-    
+    owns_profile = serializers.SerializerMethodField()
+    authors_profile =serializers.SerializerMethodField()
     class Meta:
         model = Post
         fields = [
             "title",
             'can_update',
+            'authors_profile',
             "views",
             "category",
             "image",
             "post",
             "date",
             'comment_count',
+            'verified',
+            'owns_profile',
             'comment',
             'author',
             'likes_count',
@@ -154,6 +175,20 @@ class PostDetailSerializer(serializers.ModelSerializer):
         if user.is_authenticated:
             if obj.dislikes.contains(user):
                 return True
+        return False
+
+
+    def get_verified(self,obj):
+        profile = UserProfile.objects.get(user__username=self.get_author(obj))
+        return profile.is_verified
+    
+    def get_authors_profile(self,obj):
+        profile = UserProfile.objects.get(user = obj.author)
+        return user_serializers.UserProfileSerializer(profile,context=self.context).data
+    
+    def get_owns_profile(self,obj):
+        if self.context.get('request').user.is_authenticated:
+            return self.context.get('request').user == obj.author
         return False
     
     def get_liked(self,obj:Post):
@@ -240,34 +275,6 @@ class PostCreateSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-
-class UserProfilePostListSerializers(serializers.ModelSerializer):
-    intro = serializers.SerializerMethodField()
-    date = serializers.SerializerMethodField()
-    category = serializers.SerializerMethodField()
-    class Meta:
-        model = Post
-        fields = [
-            "title",
-            "views",
-            "category",
-            "image",
-            "intro",
-            "author",
-
-            'date',
-            'slug'
-        ]
-    def get_date(self, obj):
-
-        return obj.get_formated_date
-
-    def get_intro(self,obj):
-        return obj.post[0:300]
-
-    def get_category(self,obj:Post):
-        qs = obj.category.first()
-        return f"{qs}"
 
 
 
