@@ -48,6 +48,10 @@ class UserProfileApiView(RetrieveUpdateAPIView):
             user = request.user
             user.email = email
             user.save()
+        print(request.data.get('image'))
+        obj = self.get_object()
+        obj.image = request.data.get('image')
+        obj.save()
         return super().patch(request, *args, **kwargs)
 
 
@@ -91,19 +95,19 @@ class UserProfileVisitorsView(RetrieveAPIView):
 class UserSearchView(ListAPIView):
     serializer_class = UserProfileSearchSerializer
     queryset = UserProfile.objects.all()
-    
+
     def get_queryset(self):
         qs = super().get_queryset()
         username = self.request.query_params.get("username")
         return qs.filter(user__username__icontains = username)
-        
+
 
 
 
 class FollowUserProfile(APIView):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def get(self,request,*args,**kwargs):
         requesting_user = request.user
         try:
@@ -115,7 +119,7 @@ class FollowUserProfile(APIView):
                 Notifications.objects.create(
                     notification = f"{requesting_user} just unfollowed you.",
                     user=user,
-                    
+
                 )
                 return Response('unfollowed succesfully')
             else:
@@ -124,7 +128,7 @@ class FollowUserProfile(APIView):
                 Notifications.objects.create(
                     notification = f"{requesting_user} started following you",
                     user=user,
-                    
+
                 )
 
                 return Response('followed succesfully')
